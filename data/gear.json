@@ -1,47 +1,19 @@
 [
   {
-    "name": "Nike Alphafly",
-    "label": "Nike Alphafly 3 rosa",
-    "km": 59.3,
-    "activities": 4,
-    "max_km": 500,
-    "first_used": "2026-11-08",
-    "last_used": "2026-11-17",
-    "photo": "./data/gear/5e730df0.jpg",
-    "runs": [
-      {
-        "date": "2026-11-17",
-        "name": "Caronno Pertusella - 3 x 2 km a ritmo maratona",
-        "km": 13.1
-      },
-      {
-        "date": "2026-11-14",
-        "name": "Caronno Pertusella Running",
-        "km": 6.09
-      },
-      {
-        "date": "2026-11-11",
-        "name": "Caronno Pertusella Running",
-        "km": 7.06
-      },
-      {
-        "date": "2026-11-08",
-        "name": "Caronno Pertusella - Lungo chiave 32 km con ultimi 12",
-        "km": 33.01
-      }
-    ],
-    "status": "active"
-  },
-  {
     "name": "adidas Adizero EVO SL",
     "label": "Adidas Evo SL bianche",
-    "km": 834.8,
-    "activities": 55,
+    "km": 842.8,
+    "activities": 56,
     "max_km": 800,
     "first_used": "2026-06-18",
-    "last_used": "2026-11-15",
+    "last_used": "2026-11-18",
     "photo": "./data/gear/5f07cc7e.jpg",
     "runs": [
+      {
+        "date": "2026-11-18",
+        "name": "Caronno Pertusella Running",
+        "km": 8.06
+      },
       {
         "date": "2026-11-15",
         "name": "Caronno Pertusella Running",
@@ -316,6 +288,39 @@
         "date": "2026-06-18",
         "name": "Leuven - test 5km",
         "km": 10.01
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "name": "Nike Alphafly",
+    "label": "Nike Alphafly 3 rosa",
+    "km": 59.3,
+    "activities": 4,
+    "max_km": 500,
+    "first_used": "2026-11-08",
+    "last_used": "2026-11-17",
+    "photo": "./data/gear/5e730df0.jpg",
+    "runs": [
+      {
+        "date": "2026-11-17",
+        "name": "Caronno Pertusella - 3 x 2 km a ritmo maratona",
+        "km": 13.1
+      },
+      {
+        "date": "2026-11-14",
+        "name": "Caronno Pertusella Running",
+        "km": 6.09
+      },
+      {
+        "date": "2026-11-11",
+        "name": "Caronno Pertusella Running",
+        "km": 7.06
+      },
+      {
+        "date": "2026-11-08",
+        "name": "Caronno Pertusella - Lungo chiave 32 km con ultimi 12",
+        "km": 33.01
       }
     ],
     "status": "active"
