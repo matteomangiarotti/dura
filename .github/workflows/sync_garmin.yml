@@ -34,6 +34,10 @@ jobs:
           MAP_PASSWORD: ${{ secrets.MAP_PASSWORD }}
           REPO_PATH: ${{ github.workspace }}
           GARMIN_TOKENS_OUT: ${{ runner.temp }}/garmin_tokens.json
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+          STRAVA_TOKEN_OUT: ${{ runner.temp }}/strava_token.txt
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -41,13 +45,17 @@ jobs:
 
       # Il token d'accesso dura circa un giorno e Garmin lo rinnova a ogni giro:
       # si salva quello nuovo, altrimenti la volta dopo il login fallisce.
-      - name: Salva il token Garmin rinnovato
+      - name: Salva i token Garmin e Strava rinnovati
         if: always()
         env:
           GH_TOKEN: ${{ secrets.SECRETS_PAT }}
           TOKENS_FILE: ${{ runner.temp }}/garmin_tokens.json
+          STRAVA_FILE: ${{ runner.temp }}/strava_token.txt
         run: |
           if [ -s "$TOKENS_FILE" ]; then
             gh secret set GARMINTOKENS --repo "$GITHUB_REPOSITORY" < "$TOKENS_FILE"
           fi
-          rm -f "$TOKENS_FILE"
+          if [ -s "$STRAVA_FILE" ]; then
+            gh secret set STRAVA_REFRESH_TOKEN --repo "$GITHUB_REPOSITORY" < "$STRAVA_FILE"
+          fi
+          rm -f "$TOKENS_FILE" "$STRAVA_FILE"

@@ -19,6 +19,7 @@ import math
 
 import garmin_extra
 import gps_vault
+import strava_sync
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 LOG_FILE = Path(__file__).parent / "garmin_sync.log"
@@ -1276,14 +1277,15 @@ def fetch_garmin_gear(client, activity_id):
 # ══════════════════════════════════════════════════════════════════════════════
 
 SYNCED_PATHS = ["data/activities.json", "data/gps.enc.json", "data/salute.enc.json",
-                "data/gear.json", "data/gear"]
+                "data/gear.json", "data/gear", "data/strava_status.json"]
 
 def git_push(repo_path):
     def git(*args):
         subprocess.run(["git", "-C", repo_path, *args], check=True)
 
     try:
-        git("add", *SYNCED_PATHS)
+        # strava_status.json esiste solo dopo il primo giro con Strava
+        git("add", *[p for p in SYNCED_PATHS if (Path(repo_path) / p).exists()])
         r = subprocess.run(["git","-C",repo_path,"diff","--cached","--quiet"], capture_output=True)
         if r.returncode == 0:
             log.info("Nessuna modifica da committare.")
@@ -1694,8 +1696,9 @@ def main():
 
     # Scarpe, foto e km per corsa: sempre riletti interi, cosi' una correzione
     # fatta su Garmin arriva qui anche per le corse vecchie.
+    gear_by_activity = None
     try:
-        garmin_extra.refresh_gear(client, data, repo_path)
+        gear_by_activity = garmin_extra.refresh_gear(client, data, repo_path)
     except Exception as e:
         log.warning("Scarpe non aggiornate, restano i dati precedenti: %s", e)
 
@@ -1708,6 +1711,16 @@ def main():
         json.dump(data, f, ensure_ascii=False, indent=2)
 
     log.info("Aggiunte %d nuove attivita.", added)
+
+    # Strava si allinea solo a scarpe appena rilette da Garmin, mai a dati vecchi.
+    if strava_sync.configured():
+        if gear_by_activity is not None:
+            try:
+                strava_sync.sync(garmin_extra.all_runs(client, gear_by_activity), repo_path)
+            except Exception as e:
+                log.warning("Strava non aggiornato: %s", e)
+        else:
+            log.warning("Strava non aggiornato: scarpe Garmin non lette")
 
     try:
         garmin_extra.refresh_salute(client, repo_path, map_password)

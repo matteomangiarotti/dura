@@ -48,6 +48,9 @@ def _save_photo(client, uuid, repo_path):
         dashed = f"{uuid[:8]}-{uuid[8:12]}-{uuid[12:16]}-{uuid[16:20]}-{uuid[20:]}"
         images = client.connectapi(f"/gear-service/gear/v2/{dashed}").get("images") or []
         url = images[0].get("mediumUrl") or images[0].get("url") if images else None
+        if not url and out.exists():
+            out.unlink()  # foto tolta su Garmin: si toglie anche qui
+            log.info("  Foto scarpa tolta: %s", out.name)
         if url:
             response = requests.get(url, timeout=30)
             response.raise_for_status()
@@ -104,6 +107,13 @@ def refresh_gear(client, data, repo_path):
         })
     shoes.sort(key=lambda s: (s["last_used"] or "", s["km"]), reverse=True)
 
+    # Scarpe cancellate su Garmin: via anche la loro foto dal repo.
+    keep = {Path(s["photo"]).name for s in shoes if s["photo"]}
+    for old in (repo_path / PHOTOS_RELATIVE_PATH).glob("*.jpg"):
+        if old.name not in keep:
+            old.unlink()
+            log.info("  Foto di una scarpa non piu' su Garmin tolta: %s", old.name)
+
     for record in activities:
         record["gear_name"], record["gear_km"] = by_activity.get(record.get("garmin_id"), (None, None))
 
@@ -112,6 +122,18 @@ def refresh_gear(client, data, repo_path):
     if not path.exists() or path.read_text(encoding="utf-8") != text:
         path.write_text(text, encoding="utf-8")
     log.info("Scarpe aggiornate da Garmin: %d", len(shoes))
+    return by_activity
+
+
+def all_runs(client, by_activity):
+    """Tutte le corse su Garmin, anche quelle piu' vecchie della dashboard,
+    con la loro scarpa: servono per far coincidere Strava, km compresi."""
+    return [{
+        "date": a["startTimeLocal"][:10],
+        "start_time": a["startTimeLocal"][:19],
+        "gear_name": by_activity.get(a.get("activityId"), (None, None))[0],
+        "distance_km": round((a.get("distance") or 0) / 1000, 2),
+    } for a in client.get_activities_by_date("2000-01-01", None, "running") if a.get("startTimeLocal")]
 
 
 def _hours(seconds):
