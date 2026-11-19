@@ -269,9 +269,9 @@ tr:hover .gear-more,.gear-more:focus-visible{opacity:1;}
 <div class="h-title">Matteo <span>×</span> Firenze</div>
 <div class="h-sub" id="h-sub">Caricamento...</div>
 </div>
-<button class="sync-btn" onclick="sync()">
+<button class="sync-btn" onclick="scaricaGarmin()">
 <div class="sdot" id="sdot"></div>
-<span id="s-txt">Aggiorna</span>
+<span id="s-txt">Scarica da Garmin</span>
 </button>
 </div>
 <div class="race-strip">
@@ -343,6 +343,11 @@ const GH_REPO           = 'matteo-firenze-garminconnect';
 const GH_FILE_PATH      = 'data/fc_max_history.json';
 const GEAR_OVERRIDES_JSON = './data/gear_overrides.json';
 const GH_GEAR_PATH      = 'data/gear_overrides.json';
+// Dopo "Scarica da Garmin" i dati si chiedono con ?t=..., cosi' arriva la
+// versione appena pubblicata e non una copia rimasta in cache.
+let DATA_BUST='';
+const fresh=u=>DATA_BUST?u+'?t='+DATA_BUST:u;
+let LAST_UPDATED=null; // quando lo script ha scaricato i dati l'ultima volta
 
 // ── ICS PARSER ──────────────────────────────────────────────────────────────
 function parseICS(text){
@@ -412,9 +417,10 @@ async function loadPiano(){
 // ── CARICA ACTIVITIES.JSON ───────────────────────────────────────────────────
 async function loadActivities(){
   try{
-    const r=await fetch(ACTIVITIES_JSON,{cache:'no-store'});
+    const r=await fetch(fresh(ACTIVITIES_JSON),{cache:'no-store'});
     if(!r.ok)throw new Error('activities.json non trovato');
     const data=await r.json();
+    LAST_UPDATED=data.last_updated||null;
     return {activities: data.activities||[], hr_history: data.hr_history||[]};
   }catch(e){
     console.warn('activities.json non disponibile:',e);
@@ -520,7 +526,8 @@ function buildDashboard(activities){
   const totKm=(activities||[]).reduce((s,a)=>s+(a.distance_km||0),0).toFixed(0);
   const totRun=(activities||[]).length;
   document.getElementById('h-sub').textContent=
-    `${totRun} corse · ${totKm} km · Garmin Connect · Aggiornato ${new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`;
+    `${totRun} corse · ${totKm} km · Garmin Connect`+
+    (LAST_UPDATED?` · Dati del ${new Date(LAST_UPDATED).toLocaleString('it-IT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`:'');
 
   // ── PIANO TAB ──
   const weekMap={};
@@ -783,7 +790,7 @@ let GEAR_LIST=[];
 let GEAR_STATUS={}; // nome scarpa -> 'active' o 'retired', vince sullo stato di Garmin
 async function loadGear(){
   try{
-    const r=await fetch(GEAR_JSON,{cache:'no-store'});
+    const r=await fetch(fresh(GEAR_JSON),{cache:'no-store'});
     if(r.ok)return await r.json();
   }catch(e){console.warn('gear.json non disponibile:',e);}
   return [];
@@ -1130,8 +1137,110 @@ async function sync(){
   renderScarpe();
   renderNextWorkout();
   if(!SALUTE)restorePrivateUnlock();
-  setStatus('ok','Aggiornato');
+  setStatus('ok','Scarica da Garmin');
   document.getElementById('loading').classList.add('hidden');
+}
+
+// ── SCARICA DA GARMIN ─────────────────────────────────────────────────────────
+// Il pulsante avvia l'azione "Scarica dati Garmin" su GitHub
+// (.github/workflows/sync_garmin.yml), aspetta che finisca e che GitHub Pages
+// pubblichi i file nuovi, poi ricarica la dashboard.
+const GH_SYNC_WORKFLOW='sync_garmin.yml';
+let _downloading=false;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+// Versione pubblicata di activities.json: cambia a ogni download, perche'
+// lo script riscrive sempre last_updated. HEAD = solo intestazioni, niente 1 MB.
+async function publishedVersion(){
+  try{
+    const r=await fetch(ACTIVITIES_JSON+'?t='+Date.now(),{method:'HEAD',cache:'no-store'});
+    return r.ok?(r.headers.get('etag')||r.headers.get('last-modified')||''):'';
+  }catch(e){return '';}
+}
+
+async function scaricaGarmin(){
+  if(_downloading)return;
+  const token=getGhToken();
+  if(!token){openSyncTokenModal();return;}
+  _downloading=true;
+  const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/actions/workflows/${GH_SYNC_WORKFLOW}`;
+  const headers={'Authorization':'token '+token,'Accept':'application/vnd.github+json'};
+  const corseprima=ALL_ACTIVITIES.length;
+  try{
+    setStatus('syncing','Avvio...');
+    const versionBefore=await publishedVersion();
+    const started=Date.now();
+    const d=await fetch(api+'/dispatches',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({ref:'main'})});
+    if(d.status===401){localStorage.removeItem(GH_TOKEN_KEY);throw new Error('Token non valido');}
+    if(d.status===403||d.status===404)throw new Error('Token senza permessi');
+    if(!d.ok)throw new Error('GitHub '+d.status);
+
+    // 1) L'azione su GitHub: di solito 1-2 minuti.
+    setStatus('syncing','Scarico da Garmin...');
+    let run=null;
+    while(Date.now()-started<12*60e3){
+      await wait(5000);
+      const r=await fetch(api+'/runs?event=workflow_dispatch&per_page=5',{headers,cache:'no-store'});
+      if(!r.ok)continue;
+      const runs=(await r.json()).workflow_runs||[];
+      // 15 s di margine se l'orologio del telefono e quello di GitHub non coincidono
+      run=run?runs.find(x=>x.id===run.id)||run:runs.find(x=>new Date(x.created_at).getTime()>=started-15e3)||null;
+      if(run&&run.status==='completed')break;
+    }
+    if(!run||run.status!=='completed')throw new Error('Tempo scaduto');
+    if(run.conclusion!=='success')throw new Error('Download non riuscito');
+
+    // 2) GitHub Pages: di solito meno di un minuto.
+    setStatus('syncing','Pubblicazione...');
+    while(Date.now()-started<20*60e3){
+      const v=await publishedVersion();
+      if(v&&v!==versionBefore)break;
+      await wait(8000);
+    }
+
+    // 3) Ricarica con i file nuovi. Mappe e salute restano sbloccate se la
+    //    chiave e' salvata su questo dispositivo.
+    DATA_BUST=String(Date.now());
+    const unlocked=!!SALUTE;
+    await sync();
+    if(unlocked)await restorePrivateUnlock();
+    const nuove=ALL_ACTIVITIES.length-corseprima;
+    setStatus('ok',nuove>0?(nuove===1?'1 corsa nuova':nuove+' corse nuove'):'Nessuna corsa nuova');
+  }catch(e){
+    console.error('Scarica da Garmin:',e);
+    setStatus('err',e.message);
+  }finally{
+    _downloading=false;
+  }
+}
+
+function openSyncTokenModal(){
+  const html=`
+  <div class="fcmax-modal-overlay" onclick="closeFcMaxModal()"></div>
+  <div class="fcmax-modal">
+    <h3>Scarica da Garmin</h3>
+    <p>Su questo dispositivo serve il token GitHub, una volta sola. Deve poter avviare le azioni del repo (permesso Actions).</p>
+    <div class="fcmax-field">
+      <label>Token GitHub</label>
+      <input type="password" id="sync-token" placeholder="ghp_xxxxxxxxxxxx">
+    </div>
+    <div class="fcmax-btn-row">
+      <button class="fcmax-btn fcmax-btn-secondary" onclick="closeFcMaxModal()">Annulla</button>
+      <button class="fcmax-btn fcmax-btn-primary" onclick="saveSyncToken()">Avvia</button>
+    </div>
+  </div>`;
+  let container=document.getElementById('fcmax-modal-container');
+  if(!container){container=document.createElement('div');container.id='fcmax-modal-container';document.body.appendChild(container);}
+  container.innerHTML=html;
+  document.body.style.overflow='hidden';
+}
+
+function saveSyncToken(){
+  const v=document.getElementById('sync-token').value.trim();
+  if(!v)return;
+  localStorage.setItem(GH_TOKEN_KEY,v);
+  closeFcMaxModal();
+  scaricaGarmin();
 }
 
 function toggleW(id){const el=document.getElementById(id);el.style.display=el.style.display==='none'?'block':'none';}
@@ -1146,7 +1255,7 @@ let _gpsData=null; // percorsi decifrati: solo in memoria, fino alla chiusura de
 
 // I parametri devono restare allineati a scripts/gps_vault.py.
 async function decryptVault(url,material){
-  const r=await fetch(url,{cache:'no-store'});
+  const r=await fetch(fresh(url),{cache:'no-store'});
   if(!r.ok)throw new Error(url+' non trovato');
   const vault=await r.json();
   const bytes=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));

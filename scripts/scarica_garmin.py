@@ -106,9 +106,20 @@ def pct_to_bpm(pct_lo, pct_hi, fc_max):
 # SEZIONE 1 — CARICA .env
 # ══════════════════════════════════════════════════════════════════════════════
 
+IN_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
+
+if IN_GITHUB:
+    # Il repo e' pubblico, quindi anche i log dell'azione: a schermo vanno solo
+    # avvisi ed errori, mai i dettagli delle corse (contengono le coordinate).
+    for h in logging.getLogger().handlers:
+        if isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler):
+            h.setLevel(logging.WARNING)
+
 def load_env():
     env_file = Path(__file__).parent / ".env"
     if not env_file.exists():
+        if IN_GITHUB:
+            return  # su GitHub i valori arrivano dai Secrets
         log.error(".env non trovato in %s", env_file.parent)
         sys.exit(1)
     for line in env_file.read_text(encoding="utf-8").splitlines():
@@ -1285,9 +1296,22 @@ def git_push(repo_path):
         git("rebase", "--autostash", "origin/main")
         git("push", "origin", "main")
         log.info("Push su GitHub completato.")
+        return True
     except subprocess.CalledProcessError as e:
         log.error("Errore git: %s", e)
         subprocess.run(["git","-C",repo_path,"rebase","--abort"], capture_output=True)
+        return False
+
+def save_tokens(client):
+    """Su GitHub: salva il token Garmin rinnovato, che l'azione rimette nei
+    Secrets. Il file sta fuori dal repo e non viene mai committato."""
+    out = os.environ.get("GARMIN_TOKENS_OUT", "").strip()
+    if not out:
+        return
+    try:
+        Path(out).write_text(client.client.dumps(), encoding="utf-8")
+    except Exception as e:
+        log.warning("Token Garmin non salvato: %s", type(e).__name__)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SEZIONE 7 — MAIN
@@ -1299,7 +1323,8 @@ def main():
     password  = os.environ.get("GARMIN_PASSWORD","").strip()
     repo_path = os.environ.get("REPO_PATH","").strip()
 
-    if not email or not password:
+    # Su GitHub si entra col token (GARMINTOKENS), senza password.
+    if not os.environ.get("GARMINTOKENS") and (not email or not password):
         log.error("GARMIN_EMAIL e GARMIN_PASSWORD mancano nel .env")
         sys.exit(1)
     if not repo_path or not Path(repo_path).exists():
@@ -1364,14 +1389,16 @@ def main():
         log.error("pip install garminconnect")
         sys.exit(1)
 
-    log.info("Login Garmin Connect come %s...", email)
+    log.info("Login Garmin Connect come %s...", email or "token")
     try:
-        client = Garmin(email, password)
+        # login() usa da solo GARMINTOKENS se c'e', altrimenti email e password
+        client = Garmin(email or None, password or None)
         client.login()
         log.info("Login riuscito.")
     except Exception as e:
         log.error("Login fallito: %s", e)
         sys.exit(1)
+    save_tokens(client)
 
     log.info("Scarico le ultime %d attivita...", FETCH_LIMIT)
     try:
@@ -1687,7 +1714,11 @@ def main():
     except Exception as e:
         log.warning("Salute non aggiornata, restano i dati precedenti: %s", e)
 
-    git_push(repo_path)
+    save_tokens(client)
+    if not git_push(repo_path):
+        sys.exit(1)
+    if IN_GITHUB:
+        print(f"Download completato: {added} nuove corse.")
 
 if __name__ == "__main__":
     log.info("=" * 60)

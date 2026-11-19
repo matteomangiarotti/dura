@@ -1,40 +1,53 @@
-name: Sync Garmin Activities
+name: Scarica dati Garmin
 
+# Parte dal pulsante "Scarica da Garmin" della dashboard (o a mano da GitHub).
+# E' l'unico download automatico: scarica, cifra GPS e salute, pubblica.
+# (scripts/scarica_garmin.py si puo' sempre lanciare anche a mano dal PC.) Il repo e' pubblico, quindi anche questi log: lo script stampa
+# solo avvisi ed errori, mai i dati delle corse.
 on:
-  # schedule:
-  #   - cron: "*/15 * * * *"
   workflow_dispatch:
+
+concurrency:
+  group: garmin-sync
+  cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install requests
+      - name: Installa le librerie
+        run: pip install --quiet garminconnect==0.3.3 curl_cffi==0.15.0 cryptography==46.0.3 pillow==12.1.1 requests==2.32.5
 
-      - name: Run Garmin sync script
+      - name: Scarica, cifra e pubblica
         env:
-          GARMIN_JWT_WEB:   ${{ secrets.GARMIN_JWT_WEB }}
-          GARMIN_SESSIONID: ${{ secrets.GARMIN_SESSIONID }}
-          GARMIN_SSO_GUID:  ${{ secrets.GARMIN_SSO_GUID }}
-          GARMIN_SSO_GUID2: ${{ secrets.GARMIN_SSO_GUID2 }}
-        run: python scripts/scarica_garmin.py
-
-      - name: Commit updated activities
+          GARMINTOKENS: ${{ secrets.GARMINTOKENS }}
+          MAP_PASSWORD: ${{ secrets.MAP_PASSWORD }}
+          REPO_PATH: ${{ github.workspace }}
+          GARMIN_TOKENS_OUT: ${{ runner.temp }}/garmin_tokens.json
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/activities.json
-          git diff --cached --quiet || git commit -m "chore: aggiorna activities.json [skip ci]"
-          git push
+          python scripts/scarica_garmin.py
+
+      # Il token d'accesso dura circa un giorno e Garmin lo rinnova a ogni giro:
+      # si salva quello nuovo, altrimenti la volta dopo il login fallisce.
+      - name: Salva il token Garmin rinnovato
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.SECRETS_PAT }}
+          TOKENS_FILE: ${{ runner.temp }}/garmin_tokens.json
+        run: |
+          if [ -s "$TOKENS_FILE" ]; then
+            gh secret set GARMINTOKENS --repo "$GITHUB_REPOSITORY" < "$TOKENS_FILE"
+          fi
+          rm -f "$TOKENS_FILE"

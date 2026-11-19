@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matteo-firenze-v24';
+const CACHE_NAME = 'matteo-firenze-v25';
 
 // Install: skip waiting immediately
 self.addEventListener('install', event => {
@@ -18,6 +18,13 @@ self.addEventListener('activate', event => {
 // Fetch: network-first per tutto tranne le risorse esterne pesanti
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+
+  // API GitHub, controlli HEAD e file chiesti con ?t= dopo un download:
+  // vanno sempre in rete e non si salvano (ogni ?t= sarebbe una copia in piu').
+  if (event.request.method !== 'GET' || url.hostname === 'api.github.com' ||
+      url.searchParams.has('t')) {
+    return;
+  }
 
   // Font e librerie esterne: cache-first (cambiano raramente)
   if (url.hostname === 'fonts.googleapis.com' ||
