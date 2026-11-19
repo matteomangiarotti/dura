@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-11-19T16:22:32Z",
+  "last_updated": "2026-11-19T16:49:20Z",
   "activities": [
     {
       "garmin_id": 25124077427,
@@ -23,7 +23,7 @@
       "training_effect_anaerobic": 0.0,
       "te_label": "aerobic_base",
       "gear_name": "adidas Adizero EVO SL",
-      "gear_km": 842.8,
+      "gear_km": 862.0,
       "laps": [
         {
           "lap_index": 1,
@@ -198,8 +198,8 @@
       "training_effect_aerobic": 3.5,
       "training_effect_anaerobic": 0.0,
       "te_label": "aerobic_base",
-      "gear_name": "Nike Alphafly",
-      "gear_km": 59.3,
+      "gear_name": "adidas Adizero EVO SL",
+      "gear_km": 854.0,
       "laps": [
         {
           "lap_index": 1,
@@ -452,7 +452,7 @@
       "training_effect_anaerobic": 0.0,
       "te_label": "aerobic_base",
       "gear_name": "adidas Adizero EVO SL",
-      "gear_km": 834.8,
+      "gear_km": 840.9,
       "laps": [
         {
           "lap_index": 1,
@@ -851,8 +851,8 @@
       "training_effect_aerobic": 2.700000047683716,
       "training_effect_anaerobic": 0.0,
       "te_label": "aerobic_base",
-      "gear_name": "Nike Alphafly",
-      "gear_km": 46.2,
+      "gear_name": "adidas Adizero EVO SL",
+      "gear_km": 816.8,
       "laps": [
         {
           "lap_index": 1,
@@ -1333,8 +1333,8 @@
       "training_effect_aerobic": 2.5,
       "training_effect_anaerobic": 0.0,
       "te_label": "aerobic_base",
-      "gear_name": "Nike Alphafly",
-      "gear_km": 40.1,
+      "gear_name": "Nike Vomero",
+      "gear_km": 870.7,
       "laps": [
         {
           "lap_index": 1,
