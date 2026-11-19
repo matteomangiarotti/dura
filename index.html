@@ -1171,8 +1171,12 @@ async function scaricaGarmin(){
     const versionBefore=await publishedVersion();
     const started=Date.now();
     const d=await fetch(api+'/dispatches',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({ref:'main'})});
-    if(d.status===401){localStorage.removeItem(GH_TOKEN_KEY);throw new Error('Token non valido');}
-    if(d.status===403||d.status===404)throw new Error('Token senza permessi');
+    // Token scaduto o senza permesso Actions: si dimentica, cosi' alla prossima
+    // pressione la dashboard ne chiede uno nuovo.
+    if(d.status===401||d.status===403||d.status===404){
+      localStorage.removeItem(GH_TOKEN_KEY);
+      throw new Error(d.status===401?'Token non valido, premi di nuovo':'Token senza permessi, premi di nuovo');
+    }
     if(!d.ok)throw new Error('GitHub '+d.status);
 
     // 1) L'azione su GitHub: di solito 1-2 minuti.
