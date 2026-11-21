@@ -410,6 +410,9 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 .panel.active{animation:pagein .3s ease;}
 @keyframes pagein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .wk-chev,.n-chev,.prep-chev{transition:transform .3s cubic-bezier(.25,.8,.25,1);}
+
+.weeks-hint{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:0 0 8px;border:none;background:none;font-size:12px;color:var(--text3);cursor:pointer;}
+.weeks-hint .wk-chev{width:6px;height:6px;margin:-3px 0 0;transform:rotate(45deg);}
 </style>
 
 
@@ -471,6 +474,7 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 
 
 <div id="panel-piano" class="panel active"><div id="next-workout"></div>
+  <button class="weeks-hint" id="weeks-hint" onclick="document.querySelector('.wk-list-hdr').scrollIntoView({behavior:'smooth',block:'start'})">Tutte le settimane<span class="wk-chev"></span></button>
   <div class="sec-hdr wk-list-hdr"><div class="sec-t">Settimane</div></div>
   <div id="weeks-wrap"></div>
   <div class="legend" aria-label="Legenda"><span><i class="dot done"></i>Fatta</span><span><i class="dot moved"></i>Spostata o extra</span><span><i class="dot miss"></i>Mancata</span><span><i class="dot fut"></i>Da fare</span><span><i class="dot rest"></i>Riposo</span><span><i class="dot race"></i>Gara</span></div>
@@ -1512,9 +1516,10 @@ function slide(el,open,mode){
 // distribuisce tra i blocchi, cosi' le settimane cominciano appena sotto il
 // bordo dello schermo senza un vuoto in fondo.
 function fitIntro(){
-  const zl=document.getElementById('zone-legend-wrap'),nw=document.getElementById('next-workout'),hd=document.querySelector('.wk-list-hdr');
-  if(!zl||!nw||!hd)return;
-  zl.style.paddingTop=nw.style.paddingTop=hd.style.paddingTop='';
+  const zl=document.getElementById('zone-legend-wrap'),nw=document.getElementById('next-workout'),hd=document.querySelector('.wk-list-hdr'),hint=document.getElementById('weeks-hint');
+  if(!zl||!nw||!hd||!hint)return;
+  zl.style.paddingTop=nw.style.paddingTop=hd.style.paddingTop=hint.style.paddingTop='';
+  hint.style.display=document.body.dataset.page==='piano'?'':'none';
   if(document.body.dataset.page!=='piano'||!nw.innerHTML.trim())return;
   const top=hd.getBoundingClientRect().top+window.scrollY;
   const extra=Math.min(window.innerHeight+2-top,window.innerHeight*.5);
@@ -1523,7 +1528,8 @@ function fitIntro(){
   const g=Math.min(Math.round(extra*.25),36);
   zl.style.paddingTop=g+'px';
   nw.style.paddingTop=g+'px';
-  hd.style.paddingTop=Math.round(extra-2*g)+'px';
+  // il richiamo "Tutte le settimane" resta in fondo allo schermo, le settimane subito sotto
+  hint.style.paddingTop=Math.max(0,Math.round(extra-2*g))+'px';
 }
 // Sul telefono la barra del browser cambia l'altezza mentre scorri: si
 // ricalcola solo se cambia la larghezza.
