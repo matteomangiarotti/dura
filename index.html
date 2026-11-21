@@ -6,7 +6,7 @@
 <title>Matteo · Garmin × Firenze Marathon</title>
 <!-- PWA -->
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#F2F2F7">
+<meta name="theme-color" content="#007AFF">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -22,375 +22,290 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-/* Scala dei caratteri (unica per tutta la dashboard):
-   34 titolo pagina · 22 sezione · 17 titolo scheda · 15 testo · 13 nota · 12 didascalia */
 :root{
---fs-title:34px;--fs-h2:22px;--fs-h3:17px;--fs-body:15px;--fs-sub:13px;--fs-cap:12px;--fs-num:28px;
---blue:#007AFF;--blue-t:#0066CC;--blue-d:rgba(0,122,255,.10);
---green:#34C759;--green-t:#1F7A35;--green-d:rgba(52,199,89,.14);
---amber:#FFCC00;--amber-t:#8A5A00;--amber-d:rgba(255,204,0,.20);
---red:#FF3B30;--red-t:#C9302C;--red-d:rgba(255,59,48,.12);
---purple:#AF52DE;--purple-t:#8E3CB8;--purple-d:rgba(175,82,222,.12);
---teal:#5AC8FA;--orange:#007AFF;--orange-d:rgba(0,122,255,.10);
---bg:#F2F2F7;--bg2:#FFFFFF;--bg3:#F2F2F7;--fill:#E5E5EA;
---border:#E5E5EA;--border2:#E5E5EA;
---text:#1C1C1E;--text2:#6C6C70;--text3:#8E8E93;
---sh:none;--sh-md:0 8px 24px rgba(0,0,0,.06);
---font:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Helvetica Neue',Arial,sans-serif;
---mono:var(--font);
---r:20px;--r-sm:14px;
+--orange:#007AFF;--orange-d:rgba(0,122,255,.10);
+--green:#34C759;--green-d:rgba(52,199,89,.12);
+--blue:#007AFF;--blue-d:rgba(0,122,255,.10);
+--amber:#FF9500;--amber-d:rgba(255,149,0,.12);
+--red:#FF3B30;--red-d:rgba(255,59,48,.12);
+--purple:#AF52DE;--purple-d:rgba(175,82,222,.12);
+--teal:#5AC8FA;--teal-d:rgba(90,200,250,.12);
+--bg:#f2f2f7;--bg2:#ffffff;--bg3:#f7f7f9;
+--border:#e5e5ea;--border2:#eeeef1;
+--text:#1c1c1e;--text2:#8a8a8e;--text3:#c7c7cc;
+--sh:0 1px 2px rgba(0,0,0,.04);
+--sh-md:0 8px 24px rgba(0,0,0,.06);
+--font:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+--mono:'Inter',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+--r:18px;--r-sm:12px;
 }
-html{background:var(--bg);color:var(--text);font-family:var(--font);font-size:var(--fs-body);-webkit-font-smoothing:antialiased;letter-spacing:-.01em;}
-body{background:var(--bg);}
-button{font-family:inherit;color:inherit;}
-.num{font-variant-numeric:tabular-nums;}
-
-/* ── Struttura: barra laterale (Mac/iPad) o barra in basso (iPhone) ── */
-.app{display:flex;min-height:100vh;}
-.side{display:none;}
-.main{flex:1;min-width:0;}
-.shell{max-width:760px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 24px) 16px calc(104px + env(safe-area-inset-bottom));}
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:rgba(249,249,249,.92);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top:1px solid rgba(0,0,0,.12);}
-.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;border:none;background:none;color:var(--text3);font-size:11px;font-weight:600;cursor:pointer;}
-.tab svg{width:26px;height:26px;}
-.tab.active{color:var(--blue-t);}
-@media(min-width:960px){
-  .tabbar{display:none;}
-  .side{display:flex;flex-direction:column;gap:2px;width:240px;flex-shrink:0;position:sticky;top:0;height:100vh;padding:28px 12px 20px;background:#E9E9EE;border-right:1px solid #D8D8DD;}
-  .shell{max-width:980px;padding:36px 40px 56px;}
-  .m-only{display:none !important;}
-}
-.side-t{font-size:var(--fs-h3);font-weight:700;letter-spacing:-.02em;padding:0 12px 18px;}
-.side-i{display:flex;align-items:center;gap:10px;padding:8px 12px;border:none;border-radius:8px;background:none;font-size:var(--fs-body);text-align:left;cursor:pointer;}
-.side-i svg{width:20px;height:20px;color:var(--blue-t);}
-.side-i:hover{background:rgba(0,0,0,.05);}
-.side-i.active{background:#D4D4DA;font-weight:600;}
-.side-sp{flex:1;}
-.side .sync-btn{justify-content:center;margin:0 4px;}
-.side-cap{font-size:var(--fs-cap);color:var(--text2);text-align:center;padding-top:8px;}
-
-/* ── Titoli ── */
-.panel{display:none;}.panel.active{display:block;}
-.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 4px 18px;}
-.ph-ey{font-size:var(--fs-sub);font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.02em;}
-.ph-t{font-size:var(--fs-title);font-weight:700;letter-spacing:-.03em;line-height:1.2;}
-.ph-cap{font-size:var(--fs-cap);color:var(--text2);margin-top:2px;}
-.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:30px 4px 10px;}
-.sec-h h2{font-size:var(--fs-h2);font-weight:700;letter-spacing:-.02em;}
-.sec-note{font-size:var(--fs-sub);color:var(--text2);}
-.link{border:none;background:none;color:var(--blue-t);font-size:var(--fs-body);cursor:pointer;padding:0;}
-.btn-pill{border:none;background:var(--bg2);color:var(--blue-t);font-size:var(--fs-body);font-weight:600;padding:8px 16px;border-radius:18px;cursor:pointer;}
-.sync-btn{display:flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:18px;border:none;background:var(--bg2);font-size:var(--fs-sub);font-weight:600;cursor:pointer;white-space:nowrap;}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;}
-.sync-dot.syncing{background:var(--amber);animation:blink 1s infinite;}
-.sync-dot.ok{background:var(--green);}
-.sync-dot.err{background:var(--red);}
+html{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;}
+.shell{max-width:1020px;margin:0 auto;padding:32px 18px 90px;}
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px;gap:16px;flex-wrap:wrap;}
+.eyebrow{font-family:var(--mono);font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-weight:600;}
+.h-title{font-size:clamp(26px,4.5vw,36px);font-weight:700;line-height:1.1;letter-spacing:-.02em;}
+.h-title span{color:var(--orange);}
+.h-sub{font-family:var(--mono);font-size:12px;color:var(--text2);margin-top:4px;}
+.sync-btn{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:20px;border:none;background:var(--bg2);color:var(--text);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:var(--sh);}
+.sync-btn:hover{background:var(--orange-d);color:var(--orange);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;}
+.sdot.syncing{background:var(--amber);animation:blink 1s infinite;}
+.sdot.ok{background:var(--green);}
+.sdot.err{background:var(--red);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-
-/* ── Schede ── */
-.card{background:var(--bg2);border-radius:var(--r);padding:16px 18px;}
-.card+.card{margin-top:12px;}
-.card.list{padding:0;overflow:hidden;}
-.h3{font-size:var(--fs-h3);font-weight:600;letter-spacing:-.01em;}
-.sub{font-size:var(--fs-sub);color:var(--text2);}
-.cap{font-size:var(--fs-cap);color:var(--text2);}
-.note{font-size:var(--fs-sub);color:var(--text2);line-height:1.45;margin:10px 4px 0;}
-.txt{font-size:var(--fs-body);line-height:1.4;color:#3A3A3C;}
-.sep{border-top:1px solid var(--border);}
-.row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 16px;border:none;border-top:1px solid var(--border);background:none;text-align:left;font-size:var(--fs-body);cursor:pointer;}
-.row:first-child{border-top:none;}
-.row:hover{background:rgba(0,0,0,.02);}
-.row.today{background:var(--blue-d);}
-.row-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-.row-t{font-weight:600;}
-.row-r{font-size:var(--fs-sub);color:var(--text2);white-space:nowrap;}
-.row-d{width:38px;flex-shrink:0;text-align:center;}
-.row-d b{display:block;font-size:var(--fs-cap);font-weight:600;color:var(--text2);text-transform:uppercase;}
-.row-d span{display:block;font-size:var(--fs-h3);font-weight:600;}
-.row.today .row-d b,.row.today .row-d span{color:var(--blue-t);}
-.row.rest .row-t,.row.rest .row-d span{color:var(--text2);font-weight:400;}
-.chev{width:9px;height:15px;flex-shrink:0;color:#C7C7CC;}
-.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.st-done{background:var(--green);}.st-partial{background:var(--amber);}.st-missed{background:var(--red);}
-.st-moved{background:var(--purple);}.st-pending{border:1.5px dashed var(--text3);}.st-bonus{background:var(--green);}
-.pill{display:inline-block;font-size:var(--fs-cap);font-weight:700;padding:4px 9px;border-radius:8px;letter-spacing:.02em;white-space:nowrap;}
-.p-ok{color:var(--green-t);background:var(--green-d);}
-.p-warn{color:var(--amber-t);background:var(--amber-d);}
-.p-bad{color:var(--red-t);background:var(--red-d);}
-.p-info{color:var(--blue-t);background:var(--blue-d);}
-.p-type{color:var(--text2);background:var(--bg3);text-transform:uppercase;}
-
-/* ── Numeri in riga (piano, reale) ── */
-.mx{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
-.mx.c4{grid-template-columns:repeat(4,minmax(0,1fr));}
-.mx>div{display:flex;flex-direction:column;gap:2px;padding-left:12px;border-left:1px solid var(--border);min-width:0;}
-.mx>div:first-child{padding-left:0;border-left:none;}
-.mx-l{font-size:var(--fs-cap);color:var(--text2);}
-.mx-v{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
-.mx-v small{font-size:var(--fs-sub);font-weight:500;color:var(--text2);}
-.mx-s{font-size:var(--fs-cap);color:var(--text2);}
-@media(max-width:480px){
-  .mx-v{font-size:18px;}
-  .mx.c4{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px;}
-  .mx.c4>div:nth-child(3){padding-left:0;border-left:none;}
-}
-.big{font-size:var(--fs-num);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
-.big small{font-size:var(--fs-body);font-weight:500;color:var(--text2);letter-spacing:0;}
-.stack{display:flex;flex-direction:column;gap:14px;}
-
-/* ── Barre ── */
-.bar{position:relative;height:8px;background:var(--fill);border-radius:4px;}
-.bar>i{position:absolute;left:0;top:0;bottom:0;background:var(--green);border-radius:4px;}
-.bar>b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);border-radius:1px;}
-.zbar{display:grid;gap:3px;height:8px;}
-.zbar i{border-radius:4px;background:var(--fill);}
-.zlab{display:grid;gap:3px;font-size:var(--fs-cap);color:var(--text2);font-variant-numeric:tabular-nums;}
-
-/* ── Gara ── */
-.race{display:flex;align-items:center;gap:16px;}
-.race-n{display:flex;flex-direction:column;align-items:flex-end;}
-.race-n b{font-size:40px;font-weight:700;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;}
-
-/* ── Settimana (cerchi) ── */
-.wk7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;}
-.wk7>div{display:flex;flex-direction:column;align-items:center;gap:6px;}
-.wk7-l{font-size:var(--fs-cap);font-weight:600;color:var(--text2);width:22px;height:22px;line-height:22px;border-radius:11px;}
-.wk7-l.today{background:var(--blue-t);color:#fff;}
-.wk7-k{font-size:var(--fs-cap);font-weight:600;font-variant-numeric:tabular-nums;}
-.wk7-k.dim{color:var(--text2);font-weight:400;}
-.wk7-k.strike{color:var(--text2);font-weight:400;text-decoration:line-through;}
-
-/* ── Calendario ── */
-.cal-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
-.cal-nav{display:flex;gap:4px;}
-.cal-nav button{width:32px;height:32px;border:none;border-radius:16px;background:var(--bg3);color:var(--blue-t);cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.cal-nav button:disabled{color:var(--text3);cursor:default;}
-.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));row-gap:4px;text-align:center;}
-.cal-w{font-size:var(--fs-cap);font-weight:600;color:var(--text2);padding-bottom:4px;}
-.cal-d{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:46px;padding-top:4px;border:none;background:none;border-radius:10px;cursor:pointer;}
-.cal-d:hover{background:var(--bg3);}
-.cal-d:disabled{cursor:default;background:none;}
-.cal-n{font-size:var(--fs-body);width:28px;height:28px;line-height:28px;border-radius:14px;font-variant-numeric:tabular-nums;}
-.cal-d.past .cal-n{color:var(--text2);}
-.cal-d.today .cal-n{background:var(--blue-t);color:#fff;font-weight:700;}
-.cal-d.race .cal-n{background:var(--red);color:#fff;font-weight:700;}
-.cal-b{width:24px;height:5px;border-radius:3px;}
-.cb-done,.cb-bonus{background:var(--green);}.cb-partial{background:var(--amber);}.cb-missed{background:var(--red);}
-.cb-moved{background:var(--purple);}.cb-pending{border:1.5px dashed var(--text3);}.cb-future,.cb-today{background:var(--fill);}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:var(--fs-cap);color:var(--text2);}
-.legend span{display:flex;align-items:center;gap:6px;}
-.legend i{width:12px;height:5px;border-radius:3px;}
-
-/* ── Settimane del piano ── */
-.wkd{background:var(--bg2);border-radius:var(--r);overflow:hidden;}
-.wkd+.wkd{margin-top:10px;}
-.wkd>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
-.wkd>summary::-webkit-details-marker{display:none;}
-.wkd[open]>summary{border-bottom:1px solid var(--border);}
-.wkd-pct{font-size:var(--fs-body);font-weight:700;font-variant-numeric:tabular-nums;}
-.wkd-vol{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
-.c-ok{color:var(--green-t);}.c-warn{color:var(--amber-t);}.c-bad{color:var(--red-t);}.c-dim{color:var(--text2);}
-
-/* ── Analisi ── */
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
-.kpi{background:var(--bg2);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;}
-.seg{display:flex;background:#E3E3E8;border-radius:9px;padding:2px;gap:2px;}
-.seg button{height:28px;padding:0 12px;border:none;border-radius:7px;background:none;font-size:var(--fs-sub);font-weight:500;color:#3A3A3C;cursor:pointer;}
-.seg button.on{background:var(--bg2);font-weight:600;color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12);}
-.kmc{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.kmc-in{display:flex;flex-direction:column;gap:8px;padding-top:12px;}
-.kmc-plot{position:relative;height:200px;border-bottom:1px solid #D1D1D6;}
-.kmc-grid{position:absolute;left:0;right:0;border-top:1px dashed var(--border);}
-.kmc-grid span{position:absolute;left:0;top:-9px;font-size:var(--fs-cap);color:var(--text2);background:var(--bg2);padding-right:4px;}
-.kmc-cols,.kmc-labs{display:grid;gap:8px;margin-left:44px;}
-.kmc-cols{position:absolute;left:0;right:0;top:0;bottom:0;align-items:end;}
-.kmc-col{height:100%;display:flex;align-items:flex-end;justify-content:center;gap:3px;}
-.kmc-col i{width:40%;max-width:18px;border-radius:4px 4px 0 0;}
-.kmc-p{background:var(--fill);}
-.kmc-f{background:repeating-linear-gradient(135deg,var(--fill) 0 4px,var(--bg2) 4px 8px);}
-.kmc-r{background:var(--blue-t);}
-.kmc-c{background:#8EC5FF;}
-.kmc-labs>div{display:flex;flex-direction:column;gap:2px;text-align:center;font-variant-numeric:tabular-nums;}
-.kmc-labs span{font-size:var(--fs-cap);color:var(--text2);white-space:nowrap;}
-.kmc-labs b{font-size:var(--fs-sub);font-weight:600;}
-.zrow{display:grid;grid-template-columns:104px 1fr 44px;gap:10px;align-items:center;font-size:var(--fs-sub);font-variant-numeric:tabular-nums;}
-.zrow .bar{height:10px;background:var(--bg3);border-radius:5px;}
-.zrow .bar>i{border-radius:5px;}
-
-/* ── Seduta ── */
-.lapc{position:relative;height:160px;}
-.lapc-band{position:absolute;left:0;right:0;background:rgba(0,102,204,.18);border-radius:2px;}
-.lapc-bl{position:absolute;right:0;font-size:var(--fs-cap);font-weight:600;color:var(--blue-t);background:var(--bg2);padding-left:4px;}
-.lapc-bars{position:absolute;inset:0;display:flex;align-items:flex-end;gap:3px;}
-.lapc-bars i{flex:1 1 0;min-width:2px;border-radius:4px 4px 1px 1px;background:var(--blue-t);}
-.lapc-bars i.wu{background:#D1D1D6;}.lapc-bars i.rec{background:#8EC5FF;}
-.tbl2{display:grid;font-size:var(--fs-body);font-variant-numeric:tabular-nums;}
-.tbl2>div{display:grid;grid-template-columns:1.3fr 1fr .9fr 1fr;padding:12px 16px;border-top:1px solid var(--border);align-items:center;}
-.tbl2>div:first-child{border-top:none;font-size:var(--fs-cap);color:var(--text2);padding:10px 16px;}
-.tbl2>div>:last-child{text-align:right;}
-.kv{display:flex;justify-content:space-between;gap:12px;padding:11px 16px;border-top:1px solid var(--border);font-size:var(--fs-body);}
-.kv:first-child{border-top:none;}
-.kv span:first-child{color:var(--text2);}
-.kv span:last-child{text-align:right;font-variant-numeric:tabular-nums;}
-.verdict{display:flex;gap:14px;align-items:flex-start;}
-.verdict-i{width:36px;height:36px;border-radius:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;}
-.steps{display:flex;flex-direction:column;gap:4px;}
-.steps div{font-size:var(--fs-body);line-height:1.4;color:#3A3A3C;}
-details.more>summary{list-style:none;cursor:pointer;color:var(--blue-t);font-size:var(--fs-body);padding:14px 4px 0;}
-details.more>summary::-webkit-details-marker{display:none;}
-
-/* ── Finestre (seduta, scarpa, token) ── */
-.act-modal-overlay,.fcmax-modal-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.3);}
-.act-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg);border-radius:20px;width:640px;max-width:94vw;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 24px 64px rgba(0,0,0,.2);}
-@media(max-width:640px){
-  .act-modal{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-width:100%;max-height:94vh;border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom);}
-}
-.act-modal-hdr{padding:20px 60px 4px 20px;position:relative;}
-.act-modal-title{font-size:var(--fs-h2);font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:2px;}
-.act-modal-sub{font-size:var(--fs-sub);font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.02em;}
-.act-modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;border-radius:50%;background:var(--fill);color:var(--text2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.act-modal-body{padding:14px 16px 28px;}
-.act-modal-body .sec-h{margin:24px 4px 8px;}
-.act-modal-body .sec-h h2{font-size:var(--fs-h3);}
-.act-map{width:100%;height:220px;border-radius:var(--r);overflow:hidden;background:var(--bg2);}
-.act-map-empty{display:none;}
-.act-section-title{font-size:var(--fs-h3);font-weight:600;margin:24px 4px 10px;}
-.act-hrzone-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;}
-.act-hrzone-legend-item{display:flex;align-items:center;gap:6px;font-size:var(--fs-sub);color:var(--text2);font-variant-numeric:tabular-nums;}
-.act-hrzone-dot{width:8px;height:8px;border-radius:4px;flex-shrink:0;}
-.act-hrzone-bar{display:flex;gap:2px;height:12px;border-radius:6px;overflow:hidden;}
-.act-splits-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;}
-.act-splits-table th{font-size:var(--fs-cap);font-weight:600;color:var(--text2);padding:10px 8px;text-align:left;white-space:nowrap;}
-.act-splits-table td{font-size:var(--fs-sub);padding:9px 8px;border-top:1px solid var(--border);white-space:nowrap;}
-.act-splits-table th:first-child,.act-splits-table td:first-child{padding-left:16px;color:var(--text2);}
-.fcmax-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg2);border-radius:20px;padding:24px;width:340px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.16);}
-.fcmax-modal h3{font-size:var(--fs-h3);font-weight:700;margin-bottom:6px;}
-.fcmax-modal p{font-size:var(--fs-sub);color:var(--text2);margin-bottom:16px;line-height:1.45;}
+.race-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+@media(max-width:520px){.race-strip{grid-template-columns:1fr;}}
+.race-card{background:var(--bg2);border:none;border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);position:relative;}
+.race-card.target{background:var(--bg2);}
+.rc-ey{font-family:var(--mono);font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;font-weight:600;}
+.race-card.target .rc-ey{color:var(--orange);}
+.rc-name{font-size:16px;font-weight:600;margin-bottom:3px;letter-spacing:-.01em;}
+.rc-meta{font-family:var(--mono);font-size:12px;color:var(--text2);}
+.days-pill{position:absolute;top:14px;right:14px;background:var(--orange);color:#fff;font-family:var(--font);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.tabs{display:flex;gap:2px;margin-bottom:18px;background:var(--bg3);padding:3px;border-radius:14px;border:none;width:fit-content;max-width:100%;overflow-x:auto;}
+.tab{padding:8px 18px;border-radius:11px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);background:none;border:none;transition:all .2s;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.active{background:var(--bg2);color:var(--text);font-weight:600;}
+.panel{display:none;}.panel.active{display:block;}
+.zone-legend{display:flex;flex-direction:row;align-items:flex-start;gap:12px;margin-bottom:14px;padding:12px 16px;background:var(--bg2);border:none;border-radius:var(--r-sm);box-shadow:var(--sh);}.zone-legend-chips{display:flex;flex-direction:column;gap:5px;}
+.fcmax-edit-btn{margin-left:auto;width:26px;height:26px;border-radius:50%;border:none;background:var(--bg3);color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.fcmax-edit-btn:hover{background:var(--orange-d);color:var(--orange);}
+.fcmax-modal-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.2);backdrop-filter:blur(4px);}
+.fcmax-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg2);border-radius:24px;padding:24px;width:320px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.16);}
+.fcmax-modal h3{font-size:17px;font-weight:700;margin-bottom:4px;letter-spacing:-.01em;}
+.fcmax-modal p{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;}
 .fcmax-field{margin-bottom:14px;}
-.fcmax-field label{display:block;font-size:var(--fs-sub);font-weight:600;color:var(--text2);margin-bottom:6px;}
-.fcmax-field input,.fcmax-field select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);font-family:var(--font);font-size:16px;color:var(--text);}
-.fcmax-field input:focus{outline:none;border-color:var(--blue);}
+.fcmax-field label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;}
+.fcmax-field input,.fcmax-field select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);font-family:var(--font);font-size:14px;color:var(--text);}
+.fcmax-field input:focus,.fcmax-field select:focus{outline:none;border-color:var(--orange);}
 .fcmax-btn-row{display:flex;gap:8px;margin-top:18px;}
-.fcmax-btn{flex:1;padding:12px;border-radius:12px;border:none;font-size:var(--fs-body);font-weight:600;cursor:pointer;}
-.fcmax-btn-primary{background:var(--blue);color:#fff;}
-.fcmax-btn-secondary{background:var(--bg3);color:var(--text);}
-.fcmax-status{font-size:var(--fs-sub);margin-top:10px;text-align:center;min-height:16px;}
-.fcmax-status.ok{color:var(--green-t);}.fcmax-status.err{color:var(--red-t);}.fcmax-status.loading{color:var(--text2);}
-.fcmax-history-list{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);max-height:120px;overflow-y:auto;}
-.fcmax-history-row{display:flex;justify-content:space-between;font-size:var(--fs-sub);color:var(--text2);padding:3px 0;}
+.fcmax-btn{flex:1;padding:11px;border-radius:12px;border:none;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.fcmax-btn:hover{opacity:.85;}
+.fcmax-btn-primary{background:var(--orange);color:#fff;}
+.fcmax-btn-secondary{background:var(--bg3);color:var(--text2);}
+.fcmax-status{font-size:12px;margin-top:10px;text-align:center;min-height:16px;}
+.fcmax-status.ok{color:var(--green);}
+.fcmax-status.err{color:var(--red);}
+.fcmax-status.loading{color:var(--text2);}
+.fcmax-history-list{margin-top:14px;padding-top:14px;border-top:1px solid var(--border2);max-height:120px;overflow-y:auto;}
+.fcmax-history-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--text2);padding:3px 0;}
+.zone-chip{font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;display:grid;grid-template-columns:90px 52px 90px;gap:0;}.zone-chip-name{}.zone-chip-pct{}.zone-chip-bpm{padding-left:8px;}
+@media(max-width:480px){
+.zone-legend{flex-direction:column;gap:6px;}
+.zone-chip{grid-template-columns:80px 46px 85px;font-size:10px;padding:3px 8px;}
+}
+.wk{border:none;border-radius:var(--r);margin-bottom:10px;overflow-x:auto;overflow-y:hidden;background:var(--bg2);box-shadow:var(--sh);-webkit-overflow-scrolling:touch;}
+.wk-hdr{padding:14px 18px;display:grid;grid-template-columns:70px 1fr auto;align-items:center;cursor:pointer;transition:background .15s;user-select:none;}
+.wk-hdr:hover{background:var(--bg3);}
+.wk-title{font-size:14px;font-weight:600;}
+.wk-num{font-size:14px;font-weight:600;white-space:nowrap;}
+.wk-period{font-family:var(--mono);font-size:12px;color:var(--text2);text-align:center;}
+.arrow{color:var(--orange);margin-right:4px;}
+.wk-meta{font-family:var(--mono);font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;}
+.tbl{width:100%;border-collapse:collapse;min-width:520px;}
+.tbl thead th{padding:8px 12px;font-family:var(--font);font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;background:var(--bg3);border-top:1px solid var(--border2);text-align:left;}
+.tbl thead th:not(:last-child){border-right:1px solid var(--border2);}
+.tbl td{padding:14px 14px;border-top:1px solid var(--border2);vertical-align:top;font-size:13px;}
+.tbl td:not(:last-child){border-right:1px solid var(--border2);}
+.tbl tr:hover td{background:rgba(0,0,0,.012);}
+.tbl tr.today-row td{background:var(--bg3);border-top-color:var(--border);}
+.dn{font-weight:600;font-size:13px;}
+.dd{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:1px;}
+.plan-t{font-weight:600;font-size:13px;color:var(--blue);margin-bottom:4px;}
+.plan-d{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:4px;line-height:1.6;}
+.plan-steps{margin-top:4px;}
+.plan-step{font-family:var(--mono);font-size:11px;color:var(--text2);line-height:1.35;}
+.fc-target{font-family:var(--mono);font-size:11px;margin-top:4px;padding:2px 8px;border-radius:8px;display:inline-block;font-weight:500;}
+.act-n{font-weight:600;font-size:13px;margin-bottom:4px;}
+.act-m{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:4px;line-height:1.7;}
+.act-e{font-family:var(--mono);font-size:12px;color:var(--text3);}
+.gear-name{font-family:var(--font);font-size:12px;font-weight:500;color:var(--text);}
+.gear-km{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:2px;}
+.lap-table{width:100%;border-collapse:collapse;margin-top:10px;}
+.lap-table td{font-family:var(--mono);font-size:11px;padding:3px 4px;border-top:1px solid var(--border2);color:var(--text2);}
+.lap-table td:first-child{color:var(--text3);width:28px;}
+.bdg{display:inline-flex;align-items:center;font-family:var(--font);font-size:11px;padding:2px 8px;margin-top:4px;font-weight:500;color:var(--text2);background:var(--bg3);border-radius:8px;}
+.b-ok{color:var(--text2);}
+.b-miss{color:var(--text2);}
+.b-rest{color:var(--text3);}
+.b-bonus{color:var(--text2);}
+.b-today{color:var(--text2);}
+.b-future{color:var(--text3);}
+.b-race{color:var(--text);font-weight:600;}
+.detail-btn{width:26px;height:26px;border-radius:50%;background:var(--bg3);color:var(--text);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:8px auto 0;cursor:pointer;transition:all .15s;}
+.detail-btn:hover{background:var(--orange-d);color:var(--orange);}
 
-/* ── Statistiche e grafici (Lifestyle, scarpe) ── */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px;}
-.stat-box{background:var(--bg2);border-radius:16px;padding:14px 16px;}
-.st-lbl{font-size:var(--fs-sub);color:var(--text2);margin-bottom:4px;}
-.st-val{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
-.st-sub{font-size:var(--fs-cap);color:var(--text2);margin-top:2px;}
-.chart-wrap{background:var(--bg2);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;}
-.chart-title{font-size:var(--fs-h3);font-weight:600;margin-bottom:14px;}
+.act-modal-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);}
+.act-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;background:var(--bg2);border-radius:24px;padding:0;width:640px;max-width:94vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.18);}
+.act-modal-hdr{padding:20px 24px 16px;position:relative;border-bottom:1px solid var(--border2);}
+.act-modal-title{font-size:19px;font-weight:700;letter-spacing:-.01em;}
+.act-modal-sub{font-family:var(--mono);font-size:12px;color:var(--text2);margin-top:4px;}
+.act-modal-close{position:absolute;top:16px;right:18px;background:var(--bg3);border:none;width:28px;height:28px;border-radius:50%;font-size:15px;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center;}
+.act-modal-close:hover{background:var(--border);color:var(--text);}
+.act-modal-body{padding:20px 24px 24px;}
+.act-map{width:100%;height:220px;border-radius:16px;overflow:hidden;background:var(--bg3);margin-bottom:18px;}
+.act-map-empty{width:100%;height:120px;border-radius:16px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--mono);font-size:12px;margin-bottom:18px;}
+.act-map-lock{width:100%;min-height:120px;border-radius:16px;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;margin-bottom:18px;}
+.act-map-lock-title{font-size:13px;font-weight:600;color:var(--text2);}
+.act-map-lock-row{display:flex;gap:8px;width:100%;max-width:300px;}
+.act-map-lock input{flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);font-family:var(--font);font-size:16px;color:var(--text);}
+.act-map-lock input:focus{outline:none;border-color:var(--orange);}
+.act-map-lock button{padding:10px 14px;border-radius:10px;border:none;background:var(--orange);color:#fff;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;}
+.act-map-lock button:disabled{opacity:.6;cursor:default;}
+.act-map-lock-err{font-size:12px;color:var(--red);min-height:16px;}
+.act-metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+.act-metric-box{background:var(--bg3);border-radius:12px;padding:10px 12px;}
+.act-metric-lbl{font-family:var(--font);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;}
+.act-metric-val{font-size:16px;font-weight:700;letter-spacing:-.01em;}
+.act-section-title{font-family:var(--font);font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;margin:20px 0 10px;}
+.act-hrzone-bar{display:flex;width:100%;height:28px;border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.act-hrzone-seg{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;color:#fff;min-width:0;overflow:hidden;white-space:nowrap;}
+.act-hrzone-legend{display:flex;flex-wrap:wrap;gap:10px;}
+.act-hrzone-legend-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);}
+.act-hrzone-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.act-splits-table{width:100%;border-collapse:collapse;}
+.act-splits-table th{font-family:var(--font);font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.03em;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border2);white-space:nowrap;}
+.act-splits-table td{font-family:var(--mono);font-size:12px;padding:7px 8px;border-bottom:1px solid var(--border2);color:var(--text2);white-space:nowrap;}
+.act-splits-table tr:last-child td{border-bottom:none;}
+.act-splits-table td:first-child{color:var(--text3);width:34px;}
+@media (max-width:480px){
+  .tab{padding:8px 9px;}
+  .act-modal{max-width:98vw;}
+  .act-modal-body{padding:14px 10px 20px;}
+  .act-splits-table th{font-size:8px;padding:5px 3px;letter-spacing:0;}
+  .act-splits-table td{font-size:10px;padding:5px 3px;}
+  .act-splits-table td:first-child{width:16px;}
+}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px;}
+.stat-box{background:var(--bg2);border:none;border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);}
+.st-lbl{font-family:var(--font);font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;font-weight:600;}
+.st-val{font-size:22px;font-weight:700;letter-spacing:-.02em;}
+.st-sub{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:2px;}
+.chart-wrap{background:var(--bg2);border:none;border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--sh);}
+.chart-title{font-family:var(--font);font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:14px;}
 .chart-c{position:relative;height:200px;}
 .chart-c.tall{height:270px;}
-.data-note{font-size:var(--fs-sub);color:var(--text2);margin-top:12px;line-height:1.45;}
-.gear-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
-.gear-card{background:var(--bg2);border-radius:var(--r);padding:16px 18px;cursor:pointer;}
+.data-note{font-family:var(--mono);font-size:11px;color:var(--text2);margin-top:12px;line-height:1.6;}
+.zone-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.zone-tbl{width:100%;border-collapse:collapse;min-width:520px;}
+.zone-tbl th{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;text-align:left;padding:0 10px 8px;border-bottom:1px solid var(--border2);white-space:nowrap;}
+.zone-tbl td{font-size:12px;color:var(--text2);padding:9px 10px;border-bottom:1px solid var(--border2);white-space:nowrap;}
+.zone-tbl tr:last-child td{border-bottom:none;}
+.zone-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.zone-share{display:flex;align-items:center;gap:8px;min-width:120px;}
+.zone-share-bar{height:6px;border-radius:3px;}
+.zone-share-val{color:var(--text);font-weight:600;}
+.gear-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;}
+.gear-card{background:var(--bg2);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);cursor:pointer;}
 .gear-card:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
 .gear-card-top{display:flex;align-items:center;gap:12px;}
 .gear-thumb{width:56px;height:56px;border-radius:12px;object-fit:cover;background:#fff;flex-shrink:0;}
-.gear-photo{display:block;width:100%;height:260px;object-fit:contain;background:#fff;border-radius:var(--r);margin-bottom:12px;}
-.gear-section{margin-bottom:8px;}
-.gear-section .act-section-title{margin-top:8px;}
-.gear-section-empty{font-size:var(--fs-sub);color:var(--text2);margin:0 4px;}
-.strava-todo{font-size:var(--fs-sub);color:var(--text2);margin:8px 4px;}
-.strava-todo:empty{display:none;}
-.gear-runs{background:var(--bg2);border-radius:var(--r);padding:0 16px;}
-.gear-run{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border);}
-.gear-run:first-child{border-top:none;}
-.gear-run-name{font-size:var(--fs-body);}
-.gear-run-sub{font-size:var(--fs-cap);color:var(--text2);margin-top:2px;}
-.gear-run-km{font-size:var(--fs-body);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
-.gear-card-name{font-size:var(--fs-h3);font-weight:600;letter-spacing:-.01em;}
-.gear-card-sub{font-size:var(--fs-sub);color:var(--text2);margin-top:2px;}
-.gear-card-km{font-size:var(--fs-num);font-weight:700;letter-spacing:-.03em;margin-top:12px;font-variant-numeric:tabular-nums;}
-.gear-card-km span{font-size:var(--fs-body);font-weight:500;color:var(--text2);letter-spacing:0;}
+.gear-photo{display:block;width:100%;height:280px;object-fit:contain;background:#fff;border-radius:16px;margin-bottom:16px;}
+.gear-section{margin-bottom:20px;}
+.gear-section-empty{font-size:13px;color:var(--text2);}
+.strava-todo{font-size:12px;color:var(--text2);margin:8px 0;}
+.gear-run{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2);}
+.gear-run-name{font-size:13px;font-weight:500;}
+.gear-run-sub{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);margin-top:2px;}
+.gear-run-km{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.gear-card-name{font-size:15px;font-weight:600;letter-spacing:-.01em;}
+.gear-card-sub{font-size:11px;color:var(--text2);margin-top:2px;min-height:14px;}
+.gear-card-km{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:12px;font-variant-numeric:tabular-nums;}
+.gear-card-km span{font-size:13px;font-weight:500;color:var(--text2);letter-spacing:0;}
 .gear-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:10px;}
 .gear-fill{height:100%;background:var(--blue);border-radius:3px;}
-.gear-card-meta{display:flex;justify-content:space-between;gap:8px;font-size:var(--fs-cap);color:var(--text2);margin-top:6px;}
-.unlock{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:24px 0 8px;}
-.unlock input{width:200px;padding:10px 16px;border:none;border-radius:999px;background:var(--bg2);font-family:var(--font);font-size:16px;color:var(--text);}
-.act-modal .unlock{background:var(--bg2);border-radius:var(--r);padding:28px 16px;}
-.act-modal .unlock input{background:var(--bg3);}
+.gear-card-meta{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--text2);margin-top:6px;}
+.block-title{font-size:17px;font-weight:700;letter-spacing:-.01em;margin:26px 0 12px;}
+.panel>.block-title:first-child{margin-top:6px;}
+.next-workout{margin-bottom:14px;}
+.unlock{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;padding:36px 0 8px;}
+.unlock input{width:190px;padding:10px 16px;border:none;border-radius:999px;background:var(--bg3);font-family:var(--font);font-size:16px;color:var(--text);}
 .unlock input:focus{outline:2px solid var(--blue);}
 .unlock button{width:40px;height:40px;border:none;border-radius:50%;background:var(--blue);color:#fff;font-size:18px;cursor:pointer;}
 .unlock button:disabled{opacity:.5;cursor:default;}
-.unlock-err{flex-basis:100%;text-align:center;font-size:var(--fs-sub);color:var(--red-t);min-height:16px;}
-.lock-link{display:block;margin:8px auto 0;background:none;border:none;font-size:var(--fs-sub);color:var(--blue-t);cursor:pointer;}
-.salute-empty{background:var(--bg2);border-radius:var(--r);padding:32px 18px;text-align:center;color:var(--text2);font-size:var(--fs-sub);}
+.unlock-err{flex-basis:100%;text-align:center;font-size:12px;color:var(--red);min-height:16px;}
+.lock-link{display:block;margin:4px auto 0;background:none;border:none;font-family:var(--font);font-size:12px;color:var(--text2);cursor:pointer;text-decoration:underline;}
+.salute-empty{background:var(--bg2);border-radius:var(--r);padding:36px 18px;text-align:center;color:var(--text2);font-size:13px;box-shadow:var(--sh);}
 #loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px;transition:opacity .4s;}
 #loading.hidden{opacity:0;pointer-events:none;}
-.ld-logo{font-size:var(--fs-h3);font-weight:700;letter-spacing:-.02em;}
-.ld-bar{width:140px;height:3px;background:var(--fill);border-radius:3px;overflow:hidden;}
-.ld-fill{height:100%;background:var(--blue);border-radius:3px;animation:ld 1.5s ease-in-out infinite;}
+.ld-logo{font-size:26px;font-weight:700;color:var(--orange);letter-spacing:-.02em;}
+.ld-bar{width:140px;height:3px;background:var(--border);border-radius:3px;overflow:hidden;}
+.ld-fill{height:100%;background:var(--orange);border-radius:3px;animation:ld 1.5s ease-in-out infinite;}
 @keyframes ld{0%{width:0;margin-left:0}50%{width:100%;margin-left:0}100%{width:0;margin-left:100%}}
-.ld-txt{font-size:var(--fs-sub);color:var(--text2);}
+.ld-txt{font-family:var(--font);font-size:12px;color:var(--text2);}
+@media(max-width:640px){
+.shell{padding:20px 12px 90px;}
+.tbl{display:none !important;}
+.m-day-cards{display:block !important;}
+}
+.m-day-cards{display:none;padding:8px 12px 12px;}
+.m-card{border:none;border-radius:14px;margin-bottom:10px;padding:12px 14px;background:var(--bg3);}
+.m-card.today-card{background:var(--orange-d);}
+.m-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.m-card-day{font-size:14px;font-weight:600;}
+.m-card-date{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.m-card-sec{margin-top:8px;padding-top:8px;border-top:1px solid var(--border2);}
+.m-card-lbl{font-family:var(--font);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:4px;}
 </style>
 </head>
 <body>
 <div id="loading">
-<div class="ld-logo">Matteo × Firenze</div>
+<div class="ld-logo">M × GAR</div>
 <div class="ld-bar"><div class="ld-fill"></div></div>
 <div class="ld-txt" id="ld-txt">Caricamento...</div>
 </div>
+<div class="shell">
+<div class="hdr">
+<div>
+<div class="eyebrow">Training Dashboard</div>
+<div class="h-title">Matteo <span>×</span> Firenze</div>
+<div class="h-sub" id="h-sub">Caricamento...</div>
+</div>
+<button class="sync-btn" onclick="scaricaGarmin()">
+<div class="sdot" id="sdot"></div>
+<span id="s-txt">Scarica da Garmin</span>
+</button>
+</div>
+<div class="race-strip">
+<div class="race-card">
+<div class="rc-ey">✓ Completata</div>
+<div class="rc-name">Leuven Marathon</div>
+<div class="rc-meta">19 apr 2026 · 3h11'58" · 4:32/km · FC 179 bpm</div>
+</div>
+<div class="race-card target">
+<div class="days-pill" id="days-pill">— giorni</div>
+<div class="rc-ey">Obiettivo →</div>
+<div class="rc-name">Firenze Marathon</div>
+<div class="rc-meta">29 nov 2026 · Target sub 3h00 · 4:16/km</div>
+</div>
+</div>
 
-<div class="app">
-<nav class="side" aria-label="Sezioni">
-<div class="side-t">Matteo × Firenze</div>
-<button class="side-i" data-tab="oggi" onclick="showTab('oggi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Oggi</button>
-<button class="side-i" data-tab="piano" onclick="showTab('piano')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Piano</button>
-<button class="side-i" data-tab="analisi" onclick="showTab('analisi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20v-7M10 20V8M15 20v-9M20 20V5"/></svg>Analisi</button>
-<button class="side-i" data-tab="lifestyle" onclick="showTab('lifestyle')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Lifestyle</button>
-<div class="side-sp"></div>
-<button class="sync-btn" onclick="scaricaGarmin()"><span class="sync-dot"></span><span class="sync-txt">Scarica da Garmin</span></button>
-<div class="side-cap upd-txt"></div>
-</nav>
+<div class="zone-legend" id="zone-legend-wrap">
+<span id="zone-legend-fcmax-label" style="font-family:var(--mono);font-size:11px;color:var(--text2);white-space:nowrap;padding-top:2px;">FC max — bpm →</span>
+<div class="zone-legend-chips" id="zone-legend-chips"></div>
+</div>
 
-<main class="main"><div class="shell">
-
-<section id="panel-oggi" class="panel active" aria-label="Oggi">
-<header class="ph">
-<div><div class="ph-ey" id="oggi-date"></div><h1 class="ph-t">Oggi</h1><div class="ph-cap m-only upd-txt"></div></div>
-<button class="sync-btn m-only" onclick="scaricaGarmin()"><span class="sync-dot"></span><span class="sync-txt">Scarica da Garmin</span></button>
-</header>
-<div id="oggi-race"></div>
-<div id="oggi-wo"></div>
-<div class="sec-h"><h2>Questa settimana</h2><button class="link" onclick="showTab('piano')">Piano</button></div>
-<div id="oggi-week"></div>
-<div id="oggi-last"></div>
-</section>
-
-<section id="panel-piano" class="panel" aria-label="Piano">
-<header class="ph"><h1 class="ph-t">Piano</h1><button class="btn-pill" onclick="pianoOggi()">Oggi</button></header>
-<div id="piano-cal"></div>
-<div id="piano-weeks"></div>
-</section>
-
-<section id="panel-analisi" class="panel" aria-label="Analisi">
-<header class="ph"><div><div class="ph-ey" id="analisi-ey"></div><h1 class="ph-t">Analisi</h1></div></header>
-<div class="kpis" id="an-kpis"></div>
-<div class="sec-h"><h2>Km a settimana</h2><div class="seg" role="tablist" aria-label="Periodo"><button id="km-12" class="on" onclick="setKmRange(12)">12 sett.</button><button id="km-all" onclick="setKmRange(0)">Tutto</button></div></div>
-<div class="card" id="an-km"></div>
-<div class="sec-h"><h2>Sedute chiave</h2><span class="sec-note">ultime 4 settimane</span></div>
-<div id="an-key"></div>
-<div class="sec-h"><h2>Zone di FC</h2><span class="sec-note">ultime 4 settimane</span></div>
-<div class="card" id="forma-zones"></div>
-<div class="sec-h"><h2>Training effect</h2><span class="sec-note">ultime 8 settimane</span></div>
-<div class="card"><div class="chart-c"><canvas id="cTE"></canvas></div><div class="act-hrzone-legend" id="te-legend"></div></div>
-<div class="sec-h"><h2>Scarpe</h2></div>
-<div id="scarpe-list"></div>
-<div class="strava-todo" id="strava-todo" role="status"></div>
-<p class="note">Km da Garmin Connect, più i km fatti prima di Garmin presi da Strava. La barra indica la durata impostata su Garmin.</p>
-</section>
-
-<section id="panel-lifestyle" class="panel" aria-label="Lifestyle">
-<header class="ph"><h1 class="ph-t">Lifestyle</h1></header>
+<div class="tabs">
+<button class="tab active" onclick="showTab('piano')">Piano di allenamento</button>
+<button class="tab" onclick="showTab('allenamento')">Allenamento</button>
+<button class="tab" onclick="showTab('lifestyle')">Lifestyle</button>
+</div>
+<div id="panel-piano" class="panel active"><div id="next-workout"></div><div id="weeks-wrap"></div></div>
+<div id="panel-allenamento" class="panel">
+<div class="block-title">Piano e reale</div>
+<div class="stat-grid" id="comp-stats"></div>
+<div class="chart-wrap"><div class="chart-title">Km piano vs reale (passato + futuro)</div><div class="chart-c"><canvas id="cKm"></canvas></div></div>
+<div class="chart-wrap"><div class="chart-title">Compliance settimanale (%)</div><div class="chart-c"><canvas id="cComp"></canvas></div></div>
+<div class="block-title">Forma</div>
+<div class="stat-grid" id="forma-stats"></div>
+<div class="chart-wrap"><div class="chart-title">Zone di corsa · ultime 4 settimane</div><div class="zone-scroll" id="forma-zones"></div><div class="data-note" id="forma-zones-note"></div></div>
+<div class="chart-wrap"><div class="chart-title">Tempo in zona per settimana (%)</div><div class="chart-c"><canvas id="cZoneW"></canvas></div></div>
+<div class="chart-wrap"><div class="chart-title">Training effect · ultime 8 settimane</div><div class="chart-c"><canvas id="cTE"></canvas></div><div class="act-hrzone-legend" id="te-legend" style="margin-top:12px;"></div></div>
+<div class="block-title">Scarpe</div>
+<div><div id="scarpe-list"></div><div class="strava-todo" id="strava-todo" role="status"></div><div class="data-note">Km e numero di attività da Garmin Connect, più i km fatti prima di Garmin presi da Strava. La barra indica la durata impostata su Garmin. Tocca una scarpa per foto e attività.</div></div>
+</div>
+<div id="panel-lifestyle" class="panel">
 <form class="unlock" id="recupero-empty" style="display:none;" onsubmit="submitPrivatePassword(event)">
 <input type="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
 <button type="submit" aria-label="Sblocca">→</button>
@@ -404,23 +319,13 @@ details.more>summary::-webkit-details-marker{display:none;}
 <div class="chart-wrap"><div class="chart-title">Passi al giorno</div><div class="chart-c"><canvas id="cSteps"></canvas></div></div>
 <button class="lock-link" onclick="lockPrivateData()">Blocca su questo dispositivo</button>
 </div>
-</section>
-
-</div></main>
+</div>
 </div>
 
-<nav class="tabbar" aria-label="Sezioni">
-<button class="tab" data-tab="oggi" onclick="showTab('oggi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Oggi</button>
-<button class="tab" data-tab="piano" onclick="showTab('piano')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Piano</button>
-<button class="tab" data-tab="analisi" onclick="showTab('analisi')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20v-7M10 20V8M15 20v-9M20 20V5"/></svg>Analisi</button>
-<button class="tab" data-tab="lifestyle" onclick="showTab('lifestyle')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Lifestyle</button>
-</nav>
-
 <script>
-// Data locale (non UTC): dopo mezzanotte in Italia e' gia' il giorno dopo.
-const localISO=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
-const TODAY = localISO(new Date());
-const RACE_DATE = '2026-11-29';
+const TODAY = new Date().toISOString().slice(0,10);
+const RACE  = new Date('2026-11-29');
+document.getElementById('days-pill').textContent = Math.ceil((RACE - new Date()) / 864e5) + ' giorni';
 
 const ICS_LOCAL        = './piano.ics';
 const ACTIVITIES_JSON  = './data/activities.json';
@@ -476,11 +381,7 @@ function parseICS(text){
     if(dettaglio)desc+=(desc?' ':'')+dettaglio;
     const ritmoStr=ritmo?'Ritmo: '+ritmo+'.':'';
     const dettaglioStr=dettaglio||'';
-    if(/^gara/i.test(tipo)||summary==='FIRENZE MARATHON')type='race';
-    // Fasce FC (% FC max) e di ritmo (s/km), nell'ordine in cui le scrive il piano
-    const hrRanges=[...fcRaw.matchAll(/(\d{2,3}(?:\.\d)?)\s*[-–]\s*(\d{2,3}(?:\.\d)?)\s*%\s*Fmax/gi)].map(m=>[parseFloat(m[1]),parseFloat(m[2])]);
-    const paceRanges=[...ritmo.matchAll(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/g)].map(m=>[+m[1]*60+(+m[2]),+m[3]*60+(+m[4])]);
-    const event={date:dateStr,summary,desc,ritmo:ritmoStr,dettaglio:dettaglioStr,fcDesc:fcRaw?'FC: '+fcRaw:'',type,hrMin,hrMax,hrPctMin,hrPctMax,hrRanges,paceRanges};
+    const event={date:dateStr,summary,desc,ritmo:ritmoStr,dettaglio:dettaglioStr,fcDesc:fcRaw?'FC: '+fcRaw:'',type,hrMin,hrMax,hrPctMin,hrPctMax};
     if(type==='lungo'&&gelRaw){event._gelNote=gelRaw;event._gelCount=parseInt(gelRaw)||0;}
     events.push(event);
   }
@@ -555,6 +456,19 @@ function buildZones(){
   });
 }
 
+function renderZoneLegend(){
+  const fc=WATCH_ZONES.fcMax;
+  const zones=buildZones();
+  document.getElementById('zone-legend-fcmax-label').textContent=`FC max ${fc} bpm →`;
+  const chips=document.getElementById('zone-legend-chips');
+  if(chips) chips.innerHTML=zones.map(z=>
+    `<span class="zone-chip" style="background:${z.bg};color:${z.col};">` +
+    `<span class="zone-chip-name">${z.label}</span>` +
+    `<span class="zone-chip-pct">${z.pctLabel}</span>` +
+    `<span class="zone-chip-bpm">${z.min}-${z.max} bpm</span></span>`
+  ).join('');
+}
+
 const GEL_MAP={};
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -576,449 +490,260 @@ const TC={easy:'#1d4ed8',recovery:'#15803d',lungo:'#b45309',qualita:'#FC4C02',re
 const TL={easy:'Facile',recovery:'Recovery',lungo:'Lungo',qualita:'Qualità',rest:'Riposo'};
 
 function plannedKm(p){
-  if(!p||p.type==='rest')return 0;
-  if(p.type==='race')return 42.2;
-  const num=s=>parseFloat(s.replace(',','.'));
-  // "Totale circa 12 km" / "fino a circa 15 km totali": vale piu' del titolo ("3 x 2 km")
-  const tot=(p.dettaglio||'').match(/circa\s+(\d+(?:[.,]\d+)?)\s*km/i);
-  if(tot)return num(tot[1]);
-  const s=p.summary.match(/(\d+(?:[.,]\d+)?)\s*km/i);
-  if(s)return num(s[1]);
-  const mMin=p.summary.match(/(\d+)['′]/);
-  if(mMin){const r=p.paceRanges[0];const pace=r?(r[0]+r[1])/2:320;return Math.round(parseInt(mMin[1])*60/pace*10)/10;}
+  const s=p.summary.toLowerCase();
+  const mKm=s.match(/(\d+)\s*km/);if(mKm)return parseInt(mKm[1]);
+  const mMin=s.match(/(\d+)['′]/);
+  if(mMin){
+    const t=parseInt(mMin[1]);
+    const mPace=p.desc&&p.desc.match(/(\d):(\d{2})[–\-](\d):(\d{2})/);
+    if(mPace){const minPace=(parseInt(mPace[1])*60+parseInt(mPace[2]));const maxPace=(parseInt(mPace[3])*60+parseInt(mPace[4]));const avgPace=(minPace+maxPace)/2;return Math.round(t*60/avgPace*10)/10;}
+    return Math.round(t*60/320*10)/10;
+  }
   return 8;
 }
 
-const setStatus=(st,msg)=>{
-  document.querySelectorAll('.sync-dot').forEach(e=>e.className='sync-dot '+st);
-  document.querySelectorAll('.sync-txt').forEach(e=>e.textContent=msg);
-};
+const setStatus=(st,msg)=>{document.getElementById('sdot').className='sdot '+st;document.getElementById('s-txt').textContent=msg;};
 
-// ── FORMATI ──────────────────────────────────────────────────────────────────
-const MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-const GIORNI=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
-const dObj=ds=>new Date(ds+'T12:00:00');
-const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
-const fmtLong=ds=>{const d=dObj(ds);return GIORNI[d.getDay()]+' '+d.getDate()+' '+MESI[d.getMonth()];};
-const fmtShort=ds=>{const d=dObj(ds);return d.getDate()+' '+MESI[d.getMonth()].slice(0,3);};
-const fmtDay3=ds=>GIORNI[dObj(ds).getDay()].slice(0,3);
-const daysBetween=(a,b)=>Math.round((Date.parse(b)-Date.parse(a))/864e5);
-const fmtKm=v=>v==null?'—':(Math.round(v*10)/10).toLocaleString('it-IT',{maximumFractionDigits:1});
-const fmtPace=s=>{if(!s)return '—';s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
-const fmtRange=r=>r?(r[0]===r[1]?fmtPace(r[0]):fmtPace(r[0])+'–'+fmtPace(r[1])):'';
-const fmtDur=s=>{s=Math.round(s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${m}:${String(x).padStart(2,'0')}`;};
-const rangeLabel=(a,b)=>{const x=dObj(a),y=dObj(b);return x.getMonth()===y.getMonth()?`${x.getDate()} – ${y.getDate()} ${MESI[y.getMonth()]}`:`${x.getDate()} ${MESI[x.getMonth()]} – ${y.getDate()} ${MESI[y.getMonth()]}`;};
-const sentences=txt=>(txt||'').split(/\.\s*(?=[A-ZÀ-Ù0-9])/).map(s=>s.trim().replace(/\.$/,'')).filter(Boolean);
-const TYPE_LABEL={easy:'Facile',recovery:'Recovery',lungo:'Lungo',qualita:'Qualità',rest:'Riposo',race:'Gara'};
-const ST_TXT={done:'Fatto',partial:'Parziale',missed:'Non registrata',moved:'Spostata',pending:'Non ancora scaricata da Garmin',today:'Da fare oggi',future:'In programma',rest:'Riposo',bonus:'Corsa extra',race:'Gara'};
-const CHEV='<svg class="chev" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5l6 6-6 6"/></svg>';
-const CHECK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-
-// FC del piano in bpm: per la qualita' conta la fascia dei blocchi (l'ultima), altrimenti la prima.
-function hrRange(p){
-  if(!p)return null;
-  if(p.hrRanges&&p.hrRanges.length){
-    const r=p.type==='qualita'?p.hrRanges[p.hrRanges.length-1]:p.hrRanges[0];
-    return [Math.round(WATCH_ZONES.fcMax*r[0]/100),Math.round(WATCH_ZONES.fcMax*r[1]/100)];
-  }
-  return p.hrMin&&p.hrMax?[p.hrMin,p.hrMax]:null;
-}
-
-// ── MODELLO: un oggetto per giorno, con piano, corse e stato ─────────────────
-let DAYS={},WEEKS=[],SYNC_DAY=TODAY,CAL_MONTH=null,KM_RANGE=12;
-
-function dayStatus(d){
-  const p=d.eff;
-  if(d.movedTo)return 'moved';
-  if(!p)return d.km>0?'bonus':'none';
-  if(p.type==='race')return d.km>0?'done':(d.date>=TODAY?'race':'missed');
-  if(p.type==='rest')return d.km>0?'bonus':'rest';
-  if(d.km>0)return d.km>=d.pk*0.85?'done':'partial';
-  if(d.date===TODAY)return 'today';
-  if(d.date>TODAY)return 'future';
-  if(d.date>=SYNC_DAY)return 'pending'; // dopo l'ultimo download: non si sa ancora
-  return 'missed';
-}
-
-function buildModel(){
-  SYNC_DAY=LAST_UPDATED?localISO(new Date(LAST_UPDATED)):TODAY;
-  DAYS={};
-  const day=ds=>DAYS[ds]||(DAYS[ds]={date:ds,plan:null,acts:[],km:0});
-  PIANO.forEach(p=>{day(p.date).plan=p;});
-  ALL_ACTIVITIES.forEach(a=>{const d=day(a.date);d.acts.push(a);d.km+=a.distance_km||(a.distance_m||0)/1000;});
-  Object.values(DAYS).forEach(d=>{d.acts.sort((a,b)=>(b.distance_m||0)-(a.distance_m||0));d.eff=d.plan;d.pk=plannedKm(d.plan);});
-  // Seduta saltata e fatta il giorno prima o dopo, al posto di un riposo: "spostata".
-  Object.values(DAYS).forEach(d=>{
-    const p=d.plan;
-    if(!p||p.type==='rest'||p.type==='race'||d.km>0||d.date>=TODAY||d.date>=SYNC_DAY)return;
-    for(const n of [1,-1]){
-      const o=DAYS[dateAdd(d.date,n)];
-      if(o&&o.plan&&o.plan.type==='rest'&&!o.movedFrom&&o.km>=d.pk*0.7){o.movedFrom=d.date;o.eff=p;o.pk=d.pk;d.movedTo=o.date;break;}
-    }
+// ── BUILD DASHBOARD ───────────────────────────────────────────────────────────
+function buildDashboard(activities){
+  // Indicizza attività per data
+  const byDate={};
+  (activities||[]).forEach(a=>{
+    const ds=a.date;
+    if(!byDate[ds])byDate[ds]=[];
+    byDate[ds].push(a);
   });
-  Object.values(DAYS).forEach(d=>{d.st=dayStatus(d);});
 
-  const wm={};
-  PIANO.forEach(p=>{wm[getWMon(p.date)]=1;});
-  WEEKS=Object.keys(wm).sort().map((mon,i)=>{
-    const dates=[...Array(7)].map((_,k)=>dateAdd(mon,k));
-    const ds=dates.map(x=>DAYS[x]).filter(Boolean);
-    const kmP=ds.reduce((s,d)=>s+plannedKm(d.plan),0);
-    const kmR=ds.reduce((s,d)=>s+d.km,0);
-    const kmPtoDate=ds.filter(d=>d.date<TODAY).reduce((s,d)=>s+plannedKm(d.plan),0);
-    const runs=ds.filter(d=>d.plan&&d.plan.type!=='rest'&&d.plan.type!=='race');
-    const done=runs.filter(d=>d.km>0||(d.movedTo&&DAYS[d.movedTo].km>0)).length;
-    const end=dates[6];
-    return {i,mon,end,dates,kmP,kmR,kmPtoDate,runs:runs.length,done,
-      closed:end<TODAY,current:mon<=TODAY&&TODAY<=end,race:dates.includes(RACE_DATE),
-      pct:kmP?Math.round(kmR/kmP*100):null};
-  });
-}
+  const totKm=(activities||[]).reduce((s,a)=>s+(a.distance_km||0),0).toFixed(0);
+  const totRun=(activities||[]).length;
+  document.getElementById('h-sub').textContent=
+    `${totRun} corse · ${totKm} km · Garmin Connect`+
+    (LAST_UPDATED?` · Dati del ${new Date(LAST_UPDATED).toLocaleString('it-IT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`:'');
 
-// ── CONFRONTO PIANO / REALE ──────────────────────────────────────────────────
-// Blocchi = lap ACTIVE consecutivi (Garmin segna riscaldamento, recuperi e defaticamento).
-function lapBlocks(a){
-  const blocks=[];let cur=null;
-  (a.laps||[]).filter(l=>l.distance_m>0&&l.duration_s>0).forEach(l=>{
-    if(l.intensity==='ACTIVE'){if(!cur){cur=[];blocks.push(cur);}cur.push(l);}else cur=null;
-  });
-  return blocks.map(b=>{
-    const dist=b.reduce((s,l)=>s+l.distance_m,0),dur=b.reduce((s,l)=>s+l.duration_s,0);
-    const hr=b.every(l=>l.avg_hr)?Math.round(b.reduce((s,l)=>s+l.avg_hr*l.duration_s,0)/dur):null;
-    // ritmo come media dei ritmi dei lap (gli stessi mostrati nel grafico)
-    const pace=b.every(l=>l.avg_pace_s_km)?b.reduce((s,l)=>s+l.avg_pace_s_km*l.distance_m,0)/dist:dur/dist*1000;
-    return {dist,dur,pace,hr};
-  }).filter(b=>b.dist>=150);
-}
+  // ── PIANO TAB ──
+  const weekMap={};
+  PIANO.forEach(p=>{const w=getWMon(p.date);if(!weekMap[w])weekMap[w]=[];weekMap[w].push(p);});
+  const sortedW=Object.keys(weekMap).sort();
+  const wrap=document.getElementById('weeks-wrap');wrap.innerHTML='';
+  let currentWeekIdx=-1;
+  sortedW.forEach((mon,wi)=>{const end=new Date(mon);end.setDate(end.getDate()+6);if(mon<=TODAY&&TODAY<=end.toISOString().slice(0,10))currentWeekIdx=wi;});
 
-function compareRun(d){
-  const p=d.eff,a=d.acts[0];
-  if(!p||!a||p.type==='rest'||p.type==='race')return null;
-  const pk=d.pk,km=d.km;
-  const bl=p.type==='qualita'?lapBlocks(a):[];
-  const useB=bl.length>=2;
-  const pr=p.paceRanges[0]||null,hr=hrRange(p);
-  let pace=a.avg_pace_s_km,hrv=a.avg_hr?Math.round(a.avg_hr):null;
-  if(useB){
-    const dist=bl.reduce((s,b)=>s+b.dist,0),dur=bl.reduce((s,b)=>s+b.dur,0);
-    pace=bl.reduce((s,b)=>s+b.pace*b.dist,0)/dist;
-    const hb=bl.filter(b=>b.hr);
-    hrv=hb.length?Math.round(hb.reduce((s,b)=>s+b.hr*b.dur,0)/hb.reduce((s,b)=>s+b.dur,0)):null;
-  }
-  const outside=(v,r)=>!r||v==null?null:v<r[0]?v-r[0]:v>r[1]?v-r[1]:0;
-  const dP=outside(pace,pr),dH=outside(hrv,hr);
-  const ratio=pk?km/pk:1;
-  const issues=[];
-  if(ratio<0.85)issues.push('dist');
-  if(dP!=null&&(p.type==='qualita'?Math.abs(dP)>5:dP<-8))issues.push('pace');
-  if(dH!=null&&dH>3)issues.push('hr');
-  const title=!issues.length?'In linea col piano'
-    :issues[0]==='dist'?'Seduta parziale'
-    :issues[0]==='pace'?(dP<0?'Più veloce del previsto':'Più lento del previsto')
-    :'FC sopra il previsto';
-  const parts=[];
-  if(pr&&pace){
-    const ps=bl.map(b=>b.pace);
-    const what=useB?`Blocchi a ${fmtRange([Math.min(...ps),Math.max(...ps)].map(Math.round))}`:`Ritmo medio ${fmtPace(pace)}`;
-    const dd=Math.round(dP);
-    parts.push(what+(dd===0?`, dentro la fascia ${fmtRange(pr)}`:`, ${Math.abs(dd)} s più ${dd<0?'veloce':'lento'} della fascia ${fmtRange(pr)}`));
-  }
-  if(hr&&hrv){
-    parts.push(`FC ${useB?'dei blocchi':'media'} ${hrv}`+(dH===0?', nella fascia del piano':`, ${dH<0?'sotto':'sopra'} i ${hr[0]}–${hr[1]} del piano`));
-  }
-  if(ratio<0.9||ratio>1.15)parts.push(`${fmtKm(km)} km su ${fmtKm(pk)} previsti`);
-  return {ok:!issues.length,title,text:parts.length?parts.join('. ')+'.':'',pace,hrv,dP,dH,pk,km,blocks:useB?bl:[],pr,hr};
-}
-const verdictPill=c=>c.ok?'<span class="pill p-ok">In linea</span>':`<span class="pill p-warn">${c.title}</span>`;
+  sortedW.forEach((mon,wi)=>{
+    const days=weekMap[mon];
+    const runDays=days.filter(d=>d.type!=='rest');
+    const done=runDays.filter(d=>byDate[d.date]&&byDate[d.date].length>0);
+    const end=new Date(mon);end.setDate(end.getDate()+6);
+    const isCurr=wi===currentWeekIdx;
+    const pct=runDays.length?Math.round(done.length/runDays.length*100):null;
+    const pctCol=pct===null?'var(--text3)':pct>=84?'#15803d':pct>=67?'#4ade80':pct>=50?'#facc15':pct>=34?'#f97316':'#dc2626';
+    const pctStr=pct!==null?pct+'%':isCurr?'in corso':'—';
 
-// ── PEZZI COMUNI ─────────────────────────────────────────────────────────────
-function zoneBarHtml(hr){
-  if(!hr)return '';
-  const zones=buildZones();
-  const cols=zones.map(z=>(z.max-z.min+1)+'fr').join(' ');
-  const on=zones.map(z=>z.max>=hr[0]+3&&z.min<=hr[1]-3); // 1-2 bpm di sconfinamento non contano
-  const names=zones.filter((z,i)=>on[i]).map(z=>z.name);
-  const label=names.length>1?names[0]+'–'+names[names.length-1]:names[0]||'';
-  return `<div class="stack" style="gap:6px;">
-    <div style="display:flex;justify-content:space-between;" class="cap"><span>Zone</span><span style="font-weight:600;color:var(--text);">${label}</span></div>
-    <div class="zbar" style="grid-template-columns:${cols};">${zones.map((z,i)=>`<i style="${on[i]?'background:'+HRZONE_COLORS['z'+(i+1)]:''}"></i>`).join('')}</div>
-    <div class="zlab" style="grid-template-columns:${cols};">${zones.map(z=>`<span>${z.min}</span>`).join('')}</div>
-  </div>`;
-}
+    const rowsAndCards=days.map(p=>{
+      const d=new Date(p.date);
+      const di=d.getDay()===0?6:d.getDay()-1;
+      const reals=byDate[p.date]||[];
+      const real=reals[0]||null; // prima attività del giorno
+      const isPast=p.date<TODAY,isToday=p.date===TODAY,isFut=p.date>TODAY;
+      const isRace=p.summary==='FIRENZE MARATHON';
 
-function planBodyHtml(d){
-  const p=d.eff,pr=p.paceRanges,hr=hrRange(p),q=p.type==='qualita';
-  const steps=sentences(p.dettaglio);
-  return `<div class="mx sep" style="padding-top:14px;">
-      <div><span class="mx-l">Distanza</span><span class="mx-v">${fmtKm(d.pk)}<small> km</small></span></div>
-      <div><span class="mx-l">${q?'Ritmo blocchi':'Ritmo'}</span><span class="mx-v">${pr.length?fmtRange(pr[0]):'—'}</span></div>
-      <div><span class="mx-l">${q?'FC blocchi':'FC'}</span><span class="mx-v">${hr?hr[0]+'–'+hr[1]:'—'}</span></div>
-    </div>
-    ${zoneBarHtml(hr)}
-    ${steps.length?`<div class="steps">${steps.map(s=>`<div>${escGear(s)}.</div>`).join('')}</div>`:''}
-    ${p._gelCount>0?`<div class="sub">Gel: ${escGear(p._gelNote)}</div>`:''}`;
-}
+      // Piano cell
+      const planCol=TC[p.type]||'#888';
+      const gelData=GEL_MAP[p.date];
+      const gelText=gelData&&gelData.count>0?`<div class="plan-d" style="margin-top:2px;">Gel: ${gelData.note}</div>`:'';
+      const typeLabel=p.type!=='rest'&&TL[p.type]?` <span style="font-family:var(--font);font-size:11px;font-weight:400;color:var(--text2);">(${TL[p.type]})</span>`:'';
+      let fcChip='';
+      if(p.fcDesc&&p.type!=='rest'){
+        const fc=WATCH_ZONES.fcMax;
+        let label='';
+        if(p.hrPctMin&&p.hrPctMax){
+          const bpmLo=Math.round(fc*p.hrPctMin);
+          const bpmHi=Math.round(fc*p.hrPctMax);
+          const pctLo=Math.round(p.hrPctMin*100);
+          const pctHi=Math.round(p.hrPctMax*100);
+          label=`${pctLo}–${pctHi}% FCmax ${fc} → ${bpmLo}–${bpmHi} bpm`;
+        }else if(p.hrMin&&p.hrMax){
+          label=`${p.hrMin}–${p.hrMax} bpm`;
+        }
+        if(label){fcChip=`<div class="plan-d">FC ${label}</div>`;}
+      }
+      const planCell=p.type==='rest'
+        ?`<div class="plan-t" style="color:var(--text3);">Riposo</div>${p.desc&&p.desc!=='—'?`<div class="plan-d" style="color:var(--text3);">${p.desc}</div>`:''}`
+        :`<div class="plan-t" style="color:var(--text);">${p.summary}${typeLabel}</div>
+          <div>
+            ${p.ritmo?`<div class="plan-d">${p.ritmo}</div>`:''}
+            ${p.dettaglio?splitSentences(p.dettaglio):''}
+          </div>
+          ${gelText}
+          ${fcChip}`;
 
-function ringSvg(d){
-  const st=d?d.st:'none';
-  const svg=(inner,label)=>`<svg width="34" height="34" viewBox="0 0 34 34" role="img" aria-label="${label}">${inner}</svg>`;
-  const track='<circle cx="17" cy="17" r="14" fill="none" stroke="#E5E5EA" stroke-width="4"/>';
-  const lbl=ST_TXT[st]||'';
-  if(st==='rest'||st==='none')return svg('<line x1="12" y1="17" x2="22" y2="17" stroke="#C7C7CC" stroke-width="3" stroke-linecap="round"/>','Riposo');
-  if(st==='pending')return svg('<circle cx="17" cy="17" r="14" fill="none" stroke="#AEAEB2" stroke-width="2.5" stroke-dasharray="3 4"/>',lbl);
-  if(st==='done'||st==='bonus')return svg('<circle cx="17" cy="17" r="14" fill="none" stroke="#34C759" stroke-width="4"/><path d="M11.5 17.5l3.5 3.5 7-7.5" fill="none" stroke="#1F7A35" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',lbl);
-  if(st==='partial'){
-    const C=2*Math.PI*14,f=Math.min(d.km/(d.pk||d.km),1);
-    return svg(track+`<circle cx="17" cy="17" r="14" fill="none" stroke="#FFCC00" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(C*f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 17 17)"/>`,lbl);
-  }
-  if(st==='missed')return svg('<circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,59,48,.35)" stroke-width="4"/><path d="M13 13l8 8M21 13l-8 8" stroke="#C9302C" stroke-width="2.2" stroke-linecap="round"/>',lbl);
-  if(st==='moved')return svg('<circle cx="17" cy="17" r="14" fill="none" stroke="rgba(175,82,222,.4)" stroke-width="4"/><path d="M12 17h10M18 13l4 4-4 4" fill="none" stroke="#8E3CB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',lbl);
-  return svg(track,lbl);
-}
+      // Garmin cell — mostra lap se disponibili
+      let badge='',realHtml='';
+      if(isRace){
+        badge='<span class="bdg b-race">GARA</span>';
+        realHtml='<span class="act-e" style="color:var(--purple);">Firenze Marathon 2026</span>';
+      }else if(real){
+        const hrBadge=real.avg_hr?`<span style="background:var(--bg3);color:var(--text2);font-family:var(--mono);font-size:11px;padding:2px 8px;border-radius:8px;">${Math.round(real.avg_hr)} bpm</span>`:'';
 
-// Riga piano/reale: Distanza, Ritmo, FC
-function compareGridHtml(d,c){
-  const mark=(delta,sec)=>delta==null?'':Math.round(delta)===0?`<span class="c-ok" aria-label="ok">${CHECK.replace('width="20" height="20"','width="18" height="18"')}</span>`:`<span class="cap num">${delta>0?'+':'−'}${Math.round(Math.abs(delta))}${sec?' s':''}</span>`;
-  const q=c.blocks.length>0;
-  const distDelta=c.pk?(Math.abs(c.km-c.pk)/c.pk<0.1?0:null):null;
-  return `<div style="display:grid;grid-template-columns:1.15fr 1fr 1fr 44px;row-gap:9px;column-gap:8px;align-items:center;font-size:var(--fs-body);" class="num">
-    <span></span><span class="cap">Piano</span><span class="cap">Reale</span><span></span>
-    <span class="c-dim">Distanza</span><span>${fmtKm(c.pk)} km</span><span style="font-weight:600;">${fmtKm(c.km)} km</span>${distDelta===0?mark(0):'<span></span>'}
-    ${c.pr?`<span class="c-dim">${q?'Ritmo blocchi':'Ritmo'}</span><span>${fmtRange(c.pr)}</span><span style="font-weight:600;">${fmtPace(c.pace)}</span>${mark(c.dP,true)}`:''}
-    ${c.hr&&c.hrv?`<span class="c-dim">${q?'FC blocchi':'FC media'}</span><span>${c.hr[0]}–${c.hr[1]}</span><span style="font-weight:600;">${c.hrv}</span>${mark(c.dH)}`:''}
-  </div>`;
-}
+        // Lap veloci (se presenti e allenamento di qualità)
+        let lapHtml='';
+        if(real.laps&&real.laps.length>1&&p.type==='qualita'){
+          // Se i lap hanno intensity da Garmin, usa ACTIVE per filtrare i blocchi veloci.
+          // Fallback: filtra per passo (<310 s/km = più veloci di ~5:10/km).
+          const hasIntensity=real.laps.some(l=>l.intensity);
+          const fastLaps=hasIntensity
+            ? real.laps.filter(l=>l.intensity==='ACTIVE'&&l.avg_pace_s_km)
+            : real.laps.filter(l=>l.distance_m>=500&&l.avg_pace_s_km&&l.avg_pace_s_km<310);
+          if(fastLaps.length){
+            lapHtml=`<table class="lap-table"><tbody>`+
+              fastLaps.map(l=>`<tr>
+                <td>#${l.lap_index}</td>
+                <td>${(l.distance_m/1000).toFixed(2)}km</td>
+                <td>${l.avg_pace_fmt}/km</td>
+                <td>${l.avg_hr?l.avg_hr+'bpm':''}</td>
+              </tr>`).join('')+
+              `</tbody></table>`;
+          }
+        }
 
-// Scheda di una seduta fatta (Oggi e Ultima seduta)
-function doneCardHtml(d){
-  const a=d.acts[0],c=compareRun(d);
-  const title=d.eff&&d.eff.type!=='rest'?d.eff.summary:'Corsa extra';
-  const head=`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-      <div class="row-m"><span class="sub">${cap(fmtDay3(d.date))} ${fmtShort(d.date)} · ${fmtDur(a.duration_s)}</span><span class="h3">${escGear(title)}</span></div>
-      ${c?verdictPill(c):''}${CHEV}
-    </div>`;
-  const body=c?compareGridHtml(d,c):`<div class="mx"><div><span class="mx-l">Distanza</span><span class="mx-v">${fmtKm(d.km)}<small> km</small></span></div><div><span class="mx-l">Ritmo</span><span class="mx-v">${fmtPace(a.avg_pace_s_km)}</span></div><div><span class="mx-l">FC media</span><span class="mx-v">${a.avg_hr?Math.round(a.avg_hr):'—'}</span></div></div>`;
-  return `<button class="card stack" style="width:100%;border:none;text-align:left;cursor:pointer;gap:14px;" onclick="openSeduta('${d.date}')">${head}${body}</button>`;
-}
+        const weatherLine = (real.weather_temp != null && real.weather_condition)
+          ? `<div class="plan-d" style="margin-top:2px;">${real.weather_temp}°C · ${real.weather_condition}</div>`
+          : '';
+        realHtml=`<div class="act-n">${real.name}</div>
+          <div class="act-m">${real.start_time?real.start_time.slice(11,16)+' · ':''  }${real.distance_km?real.distance_km.toFixed(1)+' km':fmtD(real.distance_m)} · ${fmtT(real.duration_s)} · ${real.avg_pace_fmt}/km</div>
+          ${weatherLine}
+          <div style="margin-top:8px;">${hrBadge}</div>
+          ${lapHtml}`;
+        badge=p.type==='rest'?'<span class="bdg b-bonus">bonus</span>':'<span class="bdg b-ok">fatto</span>';
+      }else if(p.type==='rest'){
+        realHtml='<span class="act-e">—</span>';badge='<span class="bdg b-rest">riposo</span>';
+      }else if(isToday){
+        realHtml='<span class="act-e" style="color:var(--text2);">Da fare oggi</span>';badge='<span class="bdg b-today">OGGI</span>';
+      }else if(isFut){
+        realHtml='<span class="act-e">In programma</span>';
+      }else{
+        realHtml='<span class="act-e" style="color:var(--red);">Non registrata</span>';badge='<span class="bdg b-miss">manca</span>';
+      }
 
-function nextPlanned(after){
-  return PIANO.filter(p=>p.date>after&&p.type!=='rest').sort((a,b)=>a.date.localeCompare(b.date))[0]||null;
-}
+      // Pulsante dettaglio
+      let detailCell='<td style="text-align:center;vertical-align:middle;padding:5px 4px;">';
+      if(isRace){detailCell+='<div style="font-size:18px;">🏁</div>';}
+      if(real){
+        const detailId='dt_'+(real.garmin_id||p.date.replace(/-/g,''));
+        detailCell+=`<div class="detail-btn" onclick="openActivityDetail('${detailId}')" title="Dettagli completi">⤢</div>`;
+        detailCell+=`<div id="${detailId}" style="display:none" data-activity="${encodeURIComponent(JSON.stringify(real))}"></div>`;
+      }
+      detailCell+='</td>';
 
-// ── OGGI ─────────────────────────────────────────────────────────────────────
-function renderOggi(){
-  document.getElementById('oggi-date').textContent=cap(fmtLong(TODAY));
-  const left=daysBetween(TODAY,RACE_DATE);
-  document.getElementById('oggi-race').innerHTML=left<0?'':`<div class="card race">
-    <div class="row-m" style="gap:3px;"><span class="cap" style="font-weight:600;text-transform:uppercase;letter-spacing:.02em;">Obiettivo</span><span class="h3">Firenze Marathon</span><span class="sub">Dom 29 nov · sub 3:00 · 4:16/km</span></div>
-    <div class="race-n">${left===0?'<b>Oggi</b>':`<b>${left}</b><span class="sub">${left===1?'giorno':'giorni'}</span>`}</div>
-  </div>`;
+      const rowCls=isToday?'today-row':'';
+      // Gear cell con km cumulativi
+      let gearHtml2='<span class="act-e">—</span>';
+      if(real&&real.gear_name){
+        const kmTot=real.gear_km!=null?real.gear_km:null;
+        gearHtml2=`<div class="gear-name">${escGear(real.gear_name)}</div>${kmTot!==null?`<div class="gear-km">${kmTot} km</div>`:''}`;
+      }
+      const gearCell=`<td style="vertical-align:top;padding:10px 12px;border-top:1px solid var(--border2);border-right:1px solid var(--border2);">${gearHtml2}</td>`;
 
-  // Allenamento di oggi
-  const d=DAYS[TODAY];
-  let wo='';
-  if(d&&d.km>0){
-    wo=doneCardHtml(d);
-  }else if(d&&d.plan&&d.plan.type!=='rest'&&d.plan.type!=='race'){
-    wo=`<div class="card stack"><div style="display:flex;align-items:center;gap:8px;"><span class="pill p-type">${TYPE_LABEL[d.plan.type]}</span><span class="sub">Non ancora registrato</span></div>
-      <div style="font-size:24px;font-weight:700;letter-spacing:-.025em;line-height:1.2;">${escGear(d.plan.summary)}</div>${planBodyHtml(d)}</div>`;
-  }else if(d&&d.plan&&d.plan.type==='race'){
-    wo=`<div class="card stack"><span class="pill p-bad" style="align-self:flex-start;">GARA</span><div style="font-size:24px;font-weight:700;">Firenze Marathon</div><span class="txt">Obiettivo sub 3:00, 4:16/km. In bocca al lupo!</span></div>`;
-  }else if(left>=0){
-    const det=d&&d.plan&&d.plan.dettaglio;
-    wo=`<div class="card stack" style="gap:6px;"><span class="h3">Riposo</span>${det?`<span class="txt">${escGear(det)}</span>`:''}</div>`;
-  }
-  document.getElementById('oggi-wo').innerHTML=wo?`<div class="sec-h"><h2>Allenamento di oggi</h2></div>${wo}`:'';
+      const tableRow=`<tr class="${rowCls}">
+        <td><div class="dn">${DN[di]}</div><div class="dd">${d.getDate()} ${fmtDt(p.date).split(' ')[1]}</div>${badge}</td>
+        <td>${planCell}</td>
+        <td>${realHtml}</td>
+        ${gearCell}
+        ${detailCell}
+      </tr>`;
 
-  // Settimana
-  const w=WEEKS.find(x=>x.current);
-  const wk=document.getElementById('oggi-week');
-  wk.previousElementSibling.style.display=w?'':'none';
-  if(!w){wk.innerHTML='';}
-  else{
-    const rings=w.dates.map((ds,k)=>{
-      const dd=DAYS[ds];
-      const st=dd?dd.st:'none';
-      let lab;
-      if(st==='rest'||st==='none')lab='<span class="wk7-k dim">riposo</span>';
-      else if(dd.km>0)lab=`<span class="wk7-k">${fmtKm(dd.km)}</span>`;
-      else if(st==='missed'||st==='moved')lab=`<span class="wk7-k strike">${fmtKm(dd.pk)}</span>`;
-      else lab=`<span class="wk7-k dim">${fmtKm(dd.pk)}</span>`;
-      return `<div><span class="wk7-l${ds===TODAY?' today':''}">${DN[k][0]}</span>${ringSvg(dd)}${lab}</div>`;
-    }).join('');
-    const pend=w.dates.filter(ds=>DAYS[ds]&&DAYS[ds].st==='pending').map(ds=>GIORNI[dObj(ds).getDay()]);
-    const pendTxt=pend.length?`<span class="cap">${cap(pend.length>1?pend.slice(0,-1).join(', ')+' e '+pend[pend.length-1]:pend[0])}: ${pend.length>1?'non ancora scaricati':'non ancora scaricato'} da Garmin.</span>`:'';
-    const nx=nextPlanned(TODAY);
-    const nxRow=nx?`<button class="row" style="padding:14px 0 0;border-top:1px solid var(--border);" onclick="openSeduta('${nx.date}')">
-        <div class="row-m"><span class="sub">${nx.date===dateAdd(TODAY,1)?'Domani':cap(fmtDay3(nx.date))+' '+fmtShort(nx.date)}</span><span class="row-t">${escGear(nx.summary)}</span></div>${CHEV}</button>`:'';
-    wk.innerHTML=`<div class="card stack" style="gap:18px;">
-      <div class="wk7">${rings}</div>
-      <div class="stack" style="gap:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;"><span class="big">${fmtKm(w.kmR)}<small> / ${fmtKm(w.kmP)} km</small></span><span class="sub">${w.done} di ${w.runs} sedute</span></div>
-        <div class="bar"><i style="width:${w.kmP?Math.min(w.kmR/w.kmP*100,100):0}%"></i></div>
-        ${pendTxt}
+      const mobileCard=`<div class="m-card${isToday?' today-card':''}">
+        <div class="m-card-hdr">
+          <div><span class="m-card-day">${DN[di]}</span> <span class="m-card-date">${d.getDate()} ${fmtDt(p.date).split(' ')[1]}</span></div>
+          <div>${badge}</div>
+        </div>
+        <div class="m-card-sec"><div class="m-card-lbl">Piano Firenze</div><div>${planCell}</div></div>
+        ${real?`<div class="m-card-sec"><div class="m-card-lbl">Garmin</div><div>${realHtml}</div></div>`:''}
+        ${real?`<div class="m-card-sec"><div class="m-card-lbl">Scarpa</div>${gearHtml2}</div>`:''}
+        ${detailCell.replace('<td','<div').replace('</td>','</div>').replace(/style="[^"]*"/,'')}
+      </div>`;
+
+      return{tableRow,mobileCard};
+    });
+
+    const rows=rowsAndCards.map(x=>x.tableRow).join('');
+    const mobileCards=rowsAndCards.map(x=>x.mobileCard).join('');
+
+    const card=document.createElement('div');card.className='wk';
+    card.innerHTML=`
+      <div class="wk-hdr" onclick="toggleW('wb${wi}')">
+        <div class="wk-num">${isCurr?'<span class="arrow">▶</span>':''}Sett. ${wi+1}</div>
+        <div class="wk-period">${fmtDtShort(mon)} – ${fmtDtShort(end.toISOString().slice(0,10))}</div>
+        <div class="wk-meta">${done.length}/${runDays.length} sessioni <span style="color:${pctCol};font-weight:600;">${pctStr}</span></div>
       </div>
-      ${nxRow}
-    </div>`;
+      <div id="wb${wi}" style="display:${isCurr?'block':'none'}">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <table class="tbl" style="min-width:560px;">
+            <thead><tr>
+              <th style="width:74px;">Giorno</th>
+              <th style="width:30%;">Piano Firenze</th>
+              <th style="width:30%;">Garmin live</th>
+              <th style="width:130px;">Gear</th>
+              <th style="width:48px;" aria-label="Dettaglio"></th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="m-day-cards">${mobileCards}</div>
+      </div>`;
+    wrap.appendChild(card);
+  });
+
+  if(currentWeekIdx>=0){
+    setTimeout(()=>{const el=document.getElementById('wb'+currentWeekIdx);if(el&&el.parentElement)el.parentElement.scrollIntoView({behavior:'smooth',block:'start'});},400);
   }
 
-  // Ultima seduta (se oggi e' gia' fatta, la scheda sopra basta)
-  const last=Object.values(DAYS).filter(x=>x.km>0&&x.date<TODAY).sort((a,b)=>b.date.localeCompare(a.date))[0];
-  document.getElementById('oggi-last').innerHTML=last&&!(d&&d.km>0)?`<div class="sec-h"><h2>Ultima seduta</h2></div>${doneCardHtml(last)}`:'';
-}
+  // ── COMPLIANCE TAB ──
+  const compW=sortedW.map((mon,wi)=>{
+    const days=weekMap[mon];
+    const run=days.filter(d=>d.type!=='rest');
+    const dn=run.filter(d=>byDate[d.date]&&byDate[d.date].length>0);
+    const kmR=days.reduce((s,p)=>(s+(byDate[p.date]||[]).reduce((ss,a)=>ss+(a.distance_km||0),0)),0);
+    const kmP=run.reduce((s,p)=>s+plannedKm(p),0);
+    const end=new Date(mon);end.setDate(end.getDate()+6);
+    const isPastW=end.toISOString().slice(0,10)<TODAY;
+    return{label:`S${wi+1}`,pct:run.length?Math.round(dn.length/run.length*100):null,kmR:+kmR.toFixed(1),kmP:+kmP.toFixed(1),run:run.length,done:dn.length,isPast:isPastW};
+  }).filter(d=>d.pct!==null);
 
-// ── PIANO ────────────────────────────────────────────────────────────────────
-const monthsOfPlan=()=>{const a=PIANO[0].date.slice(0,7),b=PIANO[PIANO.length-1].date.slice(0,7);return [a,b];};
-const monthAdd=(ym,n)=>{let [y,m]=ym.split('-').map(Number);m+=n;while(m>12){m-=12;y++;}while(m<1){m+=12;y--;}return y+'-'+String(m).padStart(2,'0');};
-function calMove(n){CAL_MONTH=monthAdd(CAL_MONTH,n);renderCal();}
+  const totP=compW.reduce((s,w)=>s+w.run,0),totD=compW.reduce((s,w)=>s+w.done,0);
+  const totKmAll=(activities||[]).reduce((s,a)=>s+(a.distance_km||0),0);
 
-function renderCal(){
-  const [lo,hi]=monthsOfPlan();
-  if(CAL_MONTH<lo)CAL_MONTH=lo;if(CAL_MONTH>hi)CAL_MONTH=hi;
-  const [y,m]=CAL_MONTH.split('-').map(Number);
-  const n=new Date(y,m,0).getDate();
-  const dates=[...Array(n)].map((_,i)=>`${CAL_MONTH}-${String(i+1).padStart(2,'0')}`);
-  const offset=(dObj(dates[0]).getDay()+6)%7;
-  const kmR=dates.reduce((s,ds)=>s+(DAYS[ds]?DAYS[ds].km:0),0);
-  const kmP=dates.reduce((s,ds)=>s+(DAYS[ds]?plannedKm(DAYS[ds].plan):0),0);
-  const cells=dates.map(ds=>{
-    const d=DAYS[ds],st=d?d.st:'none';
-    const cls=['cal-d',ds<TODAY?'past':'',ds===TODAY?'today':'',ds===RACE_DATE?'race':''].join(' ');
-    const bar=st==='none'||st==='rest'?'<span class="cal-b"></span>':`<span class="cal-b cb-${st}"></span>`;
-    const can=d&&(d.plan&&d.plan.type!=='rest'||d.km>0);
-    return `<button class="${cls}" ${can?`onclick="openSeduta('${ds}')"`:'disabled'} aria-label="${cap(fmtLong(ds))}${d&&st!=='none'?': '+ST_TXT[st]:''}"><span class="cal-n">${dObj(ds).getDate()}</span>${bar}</button>`;
-  }).join('');
-  const pad='<span></span>'.repeat(offset);
-  const arrow=dir=>`<svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${dir<0?'M8 2L2 8l6 6':'M2 2l6 6-6 6'}"/></svg>`;
-  document.getElementById('piano-cal').innerHTML=`<div class="card">
-    <div class="cal-h">
-      <span class="h3" style="font-size:20px;font-weight:700;">${cap(MESI[m-1])}</span>
-      <span class="sub num" style="margin-left:auto;">${kmP?`<b style="color:var(--text);">${fmtKm(kmR)}</b> di ${fmtKm(kmP)} km`:''}</span>
-      <span class="cal-nav"><button onclick="calMove(-1)" aria-label="Mese precedente" ${CAL_MONTH<=lo?'disabled':''}>${arrow(-1)}</button><button onclick="calMove(1)" aria-label="Mese successivo" ${CAL_MONTH>=hi?'disabled':''}>${arrow(1)}</button></span>
-    </div>
-    <div class="cal">${['L','M','M','G','V','S','D'].map(x=>`<span class="cal-w">${x}</span>`).join('')}${pad}${cells}</div>
-    <div class="legend"><span><i class="cb-done"></i>fatto</span><span><i class="cb-partial"></i>parziale</span><span><i class="cb-missed"></i>saltato</span><span><i class="cb-moved"></i>spostato</span><span><i class="cb-pending"></i>da scaricare</span></div>
-  </div>`;
-}
+  document.getElementById('comp-stats').innerHTML=[
+    {l:'Sessioni pianificate',v:totP,s:'nel periodo'},
+    {l:'Sessioni fatte',v:totD,s:'su Garmin'},
+    {l:'Compliance',v:totP?Math.round(totD/totP*100)+'%':'—',s:'media'},
+    {l:'Km totali',v:totKmAll.toFixed(0)+' km',s:'da Garmin Connect'},
+    {l:'Giorni alla gara',v:Math.ceil((RACE-new Date())/864e5),s:'Firenze 29 nov'},
+  ].map(c=>`<div class="stat-box"><div class="st-lbl">${c.l}</div><div class="st-val">${c.v}</div><div class="st-sub">${c.s}</div></div>`).join('');
 
-function dayRowHtml(ds){
-  const d=DAYS[ds];
-  if(!d||(!d.plan&&!d.km))return '';
-  const p=d.eff,a=d.acts[0],st=d.st;
-  const isToday=ds===TODAY;
-  const dcol=`<div class="row-d"><b>${isToday?'oggi':fmtDay3(ds)}</b><span>${dObj(ds).getDate()}</span></div>`;
-  if(st==='rest')return `<div class="row rest" style="cursor:default;">${dcol}<div class="row-m"><span class="row-t">Riposo</span></div></div>`;
-  const title=p&&p.type!=='rest'?p.summary:'Corsa extra';
-  let sub='';
-  if(a)sub=`${d.pk?fmtKm(d.pk)+' km → ':''}${fmtKm(d.km)} km · ${fmtPace(a.avg_pace_s_km)}/km`+(d.movedFrom?` · da ${fmtDay3(d.movedFrom)} ${dObj(d.movedFrom).getDate()}`:'');
-  else if(st==='moved')sub=`Spostata a ${fmtDay3(d.movedTo)} ${dObj(d.movedTo).getDate()}`;
-  else if(st==='pending'||st==='missed')sub=ST_TXT[st];
-  else if(st==='race')sub='Obiettivo sub 3:00 · 4:16/km';
-  else{const pr=p.paceRanges[0],hr=hrRange(p);sub=[pr?fmtRange(pr)+'/km':'',hr?'FC '+hr[0]+'–'+hr[1]:''].filter(Boolean).join(' · ');}
-  const right=['done','partial','missed','moved','pending','bonus'].includes(st)?`<span class="dot st-${st}" aria-label="${ST_TXT[st]}"></span>`:CHEV;
-  return `<button class="row${isToday?' today':''}" onclick="openSeduta('${ds}')">${dcol}<div class="row-m"><span class="row-t">${escGear(title)}</span>${sub?`<span class="sub num">${sub}</span>`:''}</div>${right}</button>`;
-}
+  setTimeout(()=>{
+    ['cComp','cKm'].forEach(id=>{const old=Chart.getChart(id);if(old)old.destroy();});
+    Chart.defaults.color='#8a8a8e';Chart.defaults.borderColor='#e5e5ea';
+    Chart.defaults.font.family="-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif";
+    const pastW=compW.filter(w=>w.kmR>0||w.done>0);
+    const SPEEDO=['#34C759','#8BD455','#FFCC00','#FF9500','#FF3B30','#991b1b'];
+    const speedoComp=w=>{if(w.pct>=84)return SPEEDO[0];if(w.pct>=67)return SPEEDO[1];if(w.pct>=50)return SPEEDO[2];if(w.pct>=34)return SPEEDO[3];if(w.pct>=17)return SPEEDO[4];return SPEEDO[5];};
 
-function weekHtml(w,open){
-  const pctCls=w.pct>=90?'c-ok':w.pct>=70?'c-warn':'c-bad';
-  const km=w.closed||w.current?`${fmtKm(w.kmR)} di ${fmtKm(w.kmP)} km`:`${fmtKm(w.kmP)} km in programma`;
-  const ses=w.closed?` · ${w.done} di ${w.runs} sedute`:'';
-  const right=w.closed&&w.pct!=null?`<span class="wkd-pct ${pctCls}">${w.pct}%</span>`:'';
-  const vol=w.current?`<div class="wkd-vol">
-      <div class="bar"><i style="width:${w.kmP?Math.min(w.kmR/w.kmP*100,100):0}%"></i>${w.kmPtoDate?`<b style="left:${Math.min(w.kmPtoDate/w.kmP*100,100)}%"></b>`:''}</div>
-      ${w.kmPtoDate?`<span class="cap">La tacca segna i km previsti fino a ieri: ${fmtKm(w.kmPtoDate)}.</span>`:''}
-    </div>`:'';
-  return `<details class="wkd" id="wk-${w.mon}"${open?' open':''}>
-    <summary><div class="row-m"><span class="row-t">${rangeLabel(w.mon,w.end)}</span><span class="sub num">Sett. ${w.i+1} di ${WEEKS.length} · ${km}${ses}</span></div>${right}${CHEV.replace('class="chev"','class="chev" style="transform:rotate(90deg)"')}</summary>
-    ${vol}${w.dates.map(dayRowHtml).join('')}
-  </details>`;
-}
+    new Chart(document.getElementById('cComp'),{type:'bar',data:{
+      labels:pastW.map(w=>w.label),
+      datasets:[{data:pastW.map(w=>w.pct),backgroundColor:pastW.map(w=>speedoComp(w)),borderRadius:8}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'#eeeef1'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});
 
-function renderWeeks(){
-  const cur=WEEKS.filter(w=>w.current),fut=WEEKS.filter(w=>w.mon>TODAY),past=WEEKS.filter(w=>w.end<TODAY).reverse();
-  const group=(t,ws,open)=>ws.length?`<div class="sec-h"><h2>${t}</h2></div>`+ws.map(w=>weekHtml(w,open)).join(''):'';
-  document.getElementById('piano-weeks').innerHTML=
-    group('Questa settimana',cur,true)+
-    group(fut.length>1?'Prossime settimane':'Prossima settimana',fut,fut.length===1)+
-    group('Settimane passate',past,false);
-}
+    new Chart(document.getElementById('cKm'),{type:'bar',data:{
+      labels:compW.map(w=>w.label),
+      datasets:[
+        {label:'Piano',data:compW.map(w=>w.kmP),backgroundColor:'rgba(60,60,67,0.25)',borderRadius:6},
+        {label:'Reale',data:compW.map(w=>w.kmR||null),backgroundColor:'#007AFF',borderRadius:6},
+      ]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+' km',font:{size:11}},grid:{color:'#eeeef1'}},x:{ticks:{font:{size:10},maxRotation:0},grid:{display:false}}}}});
 
-function pianoOggi(){
-  CAL_MONTH=TODAY.slice(0,7);
-  renderCal();
-  const w=WEEKS.find(x=>x.current);
-  if(w){const el=document.getElementById('wk-'+w.mon);if(el)el.open=true;}
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// ── ANALISI ──────────────────────────────────────────────────────────────────
-function setKmRange(n){
-  KM_RANGE=n;
-  document.getElementById('km-12').classList.toggle('on',n===12);
-  document.getElementById('km-all').classList.toggle('on',n===0);
-  renderKm();
-}
-
-function renderKm(){
-  let ws=WEEKS;
-  if(KM_RANGE){
-    const cur=WEEKS.findIndex(w=>w.current);
-    const end=cur>=0?Math.min(cur+1,WEEKS.length-1):WEEKS.length-1;
-    ws=WEEKS.slice(Math.max(0,end-KM_RANGE+1),end+1);
-  }
-  const top=Math.max(20,Math.ceil(Math.max(...ws.map(w=>Math.max(w.kmP,w.kmR)))/20)*20);
-  const cols=`grid-template-columns:repeat(${ws.length},minmax(0,1fr));`;
-  const bars=ws.map(w=>{
-    const fut=w.mon>TODAY;
-    const real=fut?'':`<i class="${w.current?'kmc-c':'kmc-r'}" style="height:${w.kmR/top*100}%" title="Reale ${fmtKm(w.kmR)} km"></i>`;
-    return `<div class="kmc-col"><i class="${fut?'kmc-f':'kmc-p'}" style="height:${w.kmP/top*100}%" title="Piano ${fmtKm(w.kmP)} km"></i>${real}</div>`;
-  }).join('');
-  const labs=ws.map(w=>{
-    const pc=w.pct>=90?'c-ok':w.pct>=70?'c-warn':'c-bad';
-    const v=w.closed&&w.pct!=null?`<b class="${pc}">${w.pct}%</b>`:w.current?'<b class="c-dim" style="font-weight:400;">in corso</b>':w.race?'<b>gara</b>':`<b class="c-dim" style="font-weight:400;">${fmtKm(w.kmP)}</b>`;
-    return `<div><span>${fmtShort(w.mon)}</span>${v}</div>`;
-  }).join('');
-  document.getElementById('an-km').innerHTML=`
-    <div class="legend" style="margin:0 0 16px;padding:0;border:none;"><span><i class="kmc-p" style="height:12px;width:12px;"></i>piano</span><span><i class="kmc-r" style="height:12px;width:12px;"></i>reale</span><span><i class="kmc-c" style="height:12px;width:12px;"></i>settimana in corso</span></div>
-    <div class="kmc"><div class="kmc-in" style="min-width:${ws.length*50+44}px;">
-      <div class="kmc-plot">
-        <div class="kmc-grid" style="top:0;"><span>${top} km</span></div>
-        <div class="kmc-grid" style="top:50%;"><span>${top/2}</span></div>
-        <div class="kmc-cols" style="${cols}margin-left:44px;">${bars}</div>
-      </div>
-      <div class="kmc-labs" style="${cols}">${labs}</div>
-    </div></div>
-    <p class="note" style="margin:12px 0 0;">Percentuale = km fatti su km del piano.</p>`;
-  const sc=document.querySelector('#an-km .kmc');if(sc)sc.scrollLeft=sc.scrollWidth;
-}
-
-function renderAnalisi(){
-  document.getElementById('analisi-ey').textContent=`Blocco Firenze · ${fmtShort(PIANO[0].date)} – ${fmtShort(RACE_DATE)}`;
-  renderKm();
-  const from=dateAdd(TODAY,-28);
-  const key=Object.values(DAYS).filter(d=>d.date>=from&&d.date<=TODAY&&d.eff&&['qualita','lungo','race'].includes(d.eff.type)&&d.st!=='today'&&!d.movedTo)
-    .sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('an-key').innerHTML=key.length?`<div class="card list">${key.map(d=>{
-    const c=d.km>0?compareRun(d):null;
-    const sub=`${fmtShort(d.date)} · ${c?c.title:ST_TXT[d.st]}`;
-    return `<button class="row" onclick="openSeduta('${d.date}')"><span class="dot st-${d.st}" aria-label="${ST_TXT[d.st]}"></span><div class="row-m"><span class="row-t">${escGear(d.eff.summary)}</span><span class="sub">${sub}</span></div><span class="row-r num">${d.km>0?fmtKm(d.km)+' km':'—'}</span></button>`;
-  }).join('')}</div>`:'<div class="salute-empty">Nessuna seduta di qualità o lungo nelle ultime 4 settimane</div>';
-}
-
-// ── BUILD DASHBOARD ──────────────────────────────────────────────────────────
-function buildDashboard(){
-  Chart.defaults.color='#6C6C70';Chart.defaults.borderColor='#E5E5EA';
-  Chart.defaults.font.family="-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',sans-serif";
-  Chart.defaults.font.size=12;
-  buildModel();
-  const upd=LAST_UPDATED?'Dati Garmin del '+new Date(LAST_UPDATED).toLocaleString('it-IT',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
-  document.querySelectorAll('.upd-txt').forEach(e=>{e.textContent=upd;});
-  renderOggi();
-  if(!CAL_MONTH)CAL_MONTH=TODAY.slice(0,7);
-  renderCal();
-  renderWeeks();
-  renderAnalisi();
-  setTimeout(()=>{renderForma(ALL_ACTIVITIES);renderRecupero();},0);
+    renderForma(activities);
+    renderRecupero();
+  },300);
 }
 
 // ── FORMA E RECUPERO ──────────────────────────────────────────────────────────
@@ -1141,7 +866,7 @@ function openGearDetail(i){
       ${g.photo?`<img class="gear-photo" src="${escGear(g.photo)}" alt="Foto ${escGear(g.name)}">`:''}
       <div class="stat-grid">${stats}</div>
       <div class="act-section-title">Attività</div>
-      <div class="gear-runs">${runs}</div>
+      <div>${runs}</div>
     </div>
   </div>`;
   document.body.style.overflow='hidden';
@@ -1150,51 +875,84 @@ function openGearDetail(i){
 function renderForma(activities){
   const acts=(activities||[]).filter(a=>a.date&&a.date<=TODAY);
   const recent=acts.filter(a=>a.date>=dateAdd(TODAY,-28));
-
-  // Numeri chiave del blocco
-  const closed=WEEKS.filter(w=>w.closed&&w.kmP>0);
-  const P=closed.reduce((s,w)=>s+w.kmP,0),R=closed.reduce((s,w)=>s+w.kmR,0);
-  const last4=closed.slice(-4);
-  const avgR=last4.length?last4.reduce((s,w)=>s+w.kmR,0)/last4.length:0;
-  const avgP=last4.length?last4.reduce((s,w)=>s+w.kmP,0)/last4.length:0;
-  const inPlan=acts.filter(a=>PIANO.length&&a.date>=PIANO[0].date);
-  const longest=inPlan.reduce((b,a)=>!b||(a.distance_km||0)>(b.distance_km||0)?a:b,null);
+  const peak=recent.reduce((b,a)=>a.max_hr&&(!b||a.max_hr>b.max_hr)?a:b,null);
+  const withTe=recent.filter(a=>a.training_effect_aerobic!=null);
   const vo2=SALUTE&&SALUTE.vo2max;
-  document.getElementById('an-kpis').innerHTML=[
-    {l:'Aderenza al piano',v:P?Math.round(R/P*100)+'%':'—',s:P?`${Math.round(R).toLocaleString('it-IT')} di ${Math.round(P).toLocaleString('it-IT')} km`:''},
-    {l:'Media 4 settimane',v:last4.length?`${fmtKm(avgR)}<small> km</small>`:'—',s:last4.length?`piano ${fmtKm(avgP)} km`:''},
-    {l:'Lungo più lungo',v:longest?`${fmtKm(longest.distance_km)}<small> km</small>`:'—',s:longest?fmtShort(longest.date):''},
-    {l:'VO₂max',v:vo2?(vo2.estimate?'~':'')+vo2.value:'—',s:vo2?(vo2.estimate?'stima VDOT':'Garmin'):'si sblocca in Lifestyle'},
-  ].map(k=>`<div class="kpi"><span class="sub">${k.l}</span><span class="big">${k.v}</span><span class="cap">${k.s}</span></div>`).join('');
 
-  // Zone di FC, ultime 4 settimane
+  document.getElementById('forma-stats').innerHTML=[
+    {l:'FC max in uso',v:WATCH_ZONES.fcMax+' bpm',s:'impostata sull\'orologio'},
+    {l:vo2&&vo2.estimate?'VO₂max (stima)':'VO₂max',v:vo2?(vo2.estimate?'~':'')+vo2.value:'—',s:vo2?(vo2.estimate?'Stima VDOT, test 10 km 7/10':'Garmin'):'sblocca in Lifestyle'},
+    {l:'Picco FC 4 settimane',v:peak?peak.max_hr+' bpm':'—',s:peak?fmtDtShort(peak.date):'nessuna corsa'},
+    {l:'Training effect medio',v:withTe.length?avg(withTe.map(a=>a.training_effect_aerobic)).toFixed(1):'—',s:withTe.length?`anaerobico ${avg(withTe.map(a=>a.training_effect_anaerobic||0)).toFixed(1)} · ${withTe.length} corse`:'nessuna corsa'},
+  ].map(statHtml).join('');
+
+  // Tabella zone
   const zones=buildZones();
   const keys=['z1','z2','z3','z4','z5'];
   const secs=keys.map(k=>recent.reduce((s,a)=>s+((a.hr_zones&&a.hr_zones[k])||0),0));
-  const tot=secs.reduce((s,x)=>s+x,0);
-  document.getElementById('forma-zones').innerHTML=`<div class="stack" style="gap:10px;">${zones.map((z,i)=>{
-      const pct=tot?secs[i]/tot*100:0;
-      return `<div class="zrow"><span>${z.name} <span class="c-dim">${z.min}–${z.max}</span></span><div class="bar"><i style="width:${pct}%;background:${HRZONE_COLORS[keys[i]]};"></i></div><span style="text-align:right;font-weight:600;">${Math.round(pct)}%</span></div>`;
-    }).join('')}</div>
-    <p class="note" style="margin:14px 0 0;padding-top:12px;border-top:1px solid var(--border);">Soglie dell'orologio: FC max ${WATCH_ZONES.fcMax}, riposo ${WATCH_ZONES.rest}${tot?` · ${fmtKm(tot/3600)} h di corsa`:''}.</p>`;
+  const totSec=secs.reduce((s,x)=>s+x,0);
+  document.getElementById('forma-zones').innerHTML=`<table class="zone-tbl">
+    <thead><tr><th>Zona</th><th>% FC max</th><th>bpm</th><th>Tempo</th><th>Quota</th></tr></thead>
+    <tbody>${zones.map((z,i)=>{
+      const pct=totSec?secs[i]/totSec*100:0;
+      return `<tr>
+        <td><span class="zone-tag" style="background:${z.bg};color:${z.col};">${z.label}</span></td>
+        <td>${z.pctLabel}</td>
+        <td>${z.min}–${z.max}</td>
+        <td>${fmtHMS(secs[i])}</td>
+        <td><div class="zone-share"><div class="zone-share-bar" style="width:${Math.max(pct,1)}px;flex:0 0 ${Math.max(pct,1)}px;background:${HRZONE_COLORS[keys[i]]};"></div><span class="zone-share-val">${pct.toFixed(0)}%</span></div></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+
+  document.getElementById('forma-zones-note').textContent=
+    `Soglie dell'orologio Garmin: FC max ${WATCH_ZONES.fcMax}, FC a riposo ${WATCH_ZONES.rest}.`;
+
+  // Tempo in zona per settimana
+  const byWeek={};
+  acts.filter(a=>a.date>=WATCH_DATA_FROM).forEach(a=>{
+    const tot=keys.reduce((s,k)=>s+((a.hr_zones&&a.hr_zones[k])||0),0);
+    if(!tot)return;
+    const w=getWMon(a.date);
+    if(!byWeek[w])byWeek[w]={z1:0,z2:0,z3:0,z4:0,z5:0};
+    keys.forEach(k=>byWeek[w][k]+=(a.hr_zones[k]||0));
+  });
+  const weeks=Object.keys(byWeek).sort().slice(-10);
+  const weekPct=(w,k)=>{const t=keys.reduce((s,x)=>s+byWeek[w][x],0);return +(byWeek[w][k]/t*100).toFixed(1);};
+  newChart('cZoneW',{type:'bar',data:{
+    labels:weeks.map(fmtDtShort),
+    datasets:keys.map(k=>({label:HRZONE_LABELS[k],data:weeks.map(w=>weekPct(w,k)),backgroundColor:HRZONE_COLORS[k],borderColor:'#fff',borderWidth:1,borderRadius:3}))
+  },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:LEGEND_BOTTOM,tooltip:{callbacks:{title:i=>'Settimana del '+i[0].label,label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(0)}%`}}},
+    scales:{x:{...AXIS_X,stacked:true},y:{stacked:true,min:0,max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:GRID_Y}}}});
 
   // Training effect
   const teRuns=acts.filter(a=>a.training_effect_aerobic!=null&&a.date>=dateAdd(TODAY,-56)).sort((a,b)=>a.date.localeCompare(b.date));
   newChart('cTE',{type:'bar',data:{
-    labels:teRuns.map(a=>fmtShort(a.date)),
+    labels:teRuns.map(a=>fmtDtShort(a.date)),
     datasets:[
       {label:'Aerobico',data:teRuns.map(a=>a.training_effect_aerobic),backgroundColor:teRuns.map(a=>teInfo(a.te_label).c),borderRadius:4,order:2},
       {label:'Anaerobico',data:teRuns.map(a=>a.training_effect_anaerobic||0),backgroundColor:'rgba(60,60,67,.55)',borderRadius:4,order:1},
     ]
   },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},datasets:{bar:{grouped:false,barPercentage:.75,categoryPercentage:.9,maxBarThickness:20}},
     plugins:{legend:{display:false},tooltip:{callbacks:{
-      title:i=>{const a=teRuns[i[0].dataIndex],d=DAYS[a.date];return `${i[0].label} · ${d&&d.eff&&d.eff.type!=='rest'?d.eff.summary:'Corsa'}`;},
+      title:i=>`${i[0].label} · ${teRuns[i[0].dataIndex].name}`,
       label:c=>c.datasetIndex===0?`Aerobico ${c.parsed.y.toFixed(1)} · ${teInfo(teRuns[c.dataIndex].te_label).t}`:`Anaerobico ${c.parsed.y.toFixed(1)}`,
     }}},
-    scales:{x:AXIS_X,y:{min:0,max:5,ticks:{stepSize:1},grid:GRID_Y}}}});
+    scales:{x:AXIS_X,y:{min:0,max:5,ticks:{stepSize:1,font:{size:11}},grid:GRID_Y}}}});
   const present=[...new Set(teRuns.map(a=>a.te_label))];
   document.getElementById('te-legend').innerHTML=present.map(l=>{const i=teInfo(l);return `<div class="act-hrzone-legend-item"><div class="act-hrzone-dot" style="background:${i.c};"></div>${i.t}</div>`;}).join('')
     +`<div class="act-hrzone-legend-item"><div class="act-hrzone-dot" style="background:rgba(60,60,67,.55);"></div>Anaerobico</div>`;
+}
+
+function renderNextWorkout(){
+  const done=new Set(ALL_ACTIVITIES.map(a=>a.date));
+  const next=PIANO.filter(p=>p.type!=='rest'&&p.date>=TODAY&&!(p.date===TODAY&&done.has(p.date)))
+    .sort((a,b)=>a.date.localeCompare(b.date))[0];
+  document.getElementById('next-workout').innerHTML=!next?'':`<div class="race-card next-workout">
+    <div class="rc-ey">${next.date===TODAY?'Oggi':'Prossimo · '+fmtDt(next.date)}</div>
+    <div class="rc-name">${escGear(next.summary)}</div>
+    <div class="rc-meta">${escGear(next.desc)}</div>
+  </div>`;
 }
 
 function renderRecupero(){
@@ -1301,10 +1059,12 @@ async function sync(){
   }
   GEAR_LIST=await loadGear();
   STRAVA_STATUS=await loadStravaStatus();
+  renderZoneLegend();
 
-  buildDashboard();
+  buildDashboard(activities);
   renderScarpe();
   renderStravaTodo();
+  renderNextWorkout();
   if(!SALUTE)restorePrivateUnlock();
   setStatus('ok','Scarica da Garmin');
   document.getElementById('loading').classList.add('hidden');
@@ -1416,18 +1176,11 @@ function saveSyncToken(){
   scaricaGarmin();
 }
 
-function showTab(n){
-  if(!document.getElementById('panel-'+n))n='oggi';
-  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
-  document.querySelectorAll('[data-tab]').forEach(b=>{const on=b.dataset.tab===n;b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
-  if(location.hash!=='#'+n)history.replaceState(null,'','#'+n);
-  window.scrollTo(0,0);
-  // il grafico dei km parte dalle settimane piu' recenti
-  const sc=document.querySelector('#an-km .kmc');if(sc)sc.scrollLeft=sc.scrollWidth;
-}
+function toggleW(id){const el=document.getElementById(id);el.style.display=el.style.display==='none'?'block':'none';}
+function showTab(n){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelector(`[onclick="showTab('${n}')"]`).classList.add('active');document.getElementById('panel-'+n).classList.add('active');}
 
 // ── PANNELLO DETTAGLIO ATTIVITA COMPLETO (stile Garmin) ──────────────────────
-const HRZONE_COLORS={z1:'#5AC8FA',z2:'#34C759',z3:'#FFCC00',z4:'#FF9500',z5:'#FF3B30'};
+const HRZONE_COLORS={z1:'#3b82f6',z2:'#22c55e',z3:'#eab308',z4:'#f97316',z5:'#ef4444'};
 const HRZONE_LABELS={z1:'Z1',z2:'Z2',z3:'Z3',z4:'Z4',z5:'Z5'};
 let _actMapInstance=null;
 let _actMapGarminId=null;
@@ -1533,133 +1286,101 @@ function fmtHMS(totSec){
 }
 function fmtDistKm(m){return m?(m/1000).toFixed(2)+' km':'—';}
 
-// ── SEDUTA: piano e reale di un giorno ───────────────────────────────────────
-function lapChartHtml(a,p){
-  const laps=(a.laps||[]).filter(l=>l.distance_m>=300&&l.avg_pace_s_km);
-  if(laps.length<2)return '';
-  const pr=(p&&p.paceRanges)||[];
-  const vals=laps.map(l=>l.avg_pace_s_km).concat(...pr);
-  const fast=Math.min(...vals)-10,slow=Math.max(...vals)+10;
-  const h=v=>Math.max(3,(slow-v)/(slow-fast)*100);
-  const bands=pr.map((r,i)=>`<div class="lapc-band" style="bottom:${h(r[1])}%;height:${Math.max(2,h(r[0])-h(r[1]))}%;"></div>${i===0?`<span class="lapc-bl" style="bottom:calc(${h(r[0])}% + 3px);">piano ${fmtRange(r)}</span>`:''}`).join('');
-  const kind=l=>l.intensity==='WARMUP'||l.intensity==='COOLDOWN'?'wu':l.intensity==='RECOVERY'?'rec':'';
-  const bars=laps.map((l,i)=>`<i class="${kind(l)}" style="height:${h(l.avg_pace_s_km)}%;" title="Lap ${i+1} · ${fmtPace(l.avg_pace_s_km)}/km"></i>`).join('');
-  const step=laps.length>16?5:1;
-  const xs=laps.map((l,i)=>`<span style="flex:1 1 0;text-align:center;">${(i+1)%step===0||i===0?i+1:''}</span>`).join('');
-  const has=k=>laps.some(l=>kind(l)===k);
-  const legend=has('wu')||has('rec')?`<div class="legend" style="margin-top:10px;">${has('wu')?'<span><i style="background:#D1D1D6;height:10px;width:10px;"></i>riscaldamento e defaticamento</span>':''}<span><i style="background:var(--blue-t);height:10px;width:10px;"></i>${has('rec')?'blocchi':'corsa'}</span>${has('rec')?'<span><i style="background:#8EC5FF;height:10px;width:10px;"></i>recuperi</span>':''}</div>`:'';
-  return `<div class="sec-h"><h2>Ritmo per lap</h2><span class="sec-note">più alto = più veloce</span></div>
-    <div class="card"><div class="lapc">${bands}<div class="lapc-bars">${bars}</div></div>
-    <div class="cap num" style="display:flex;gap:3px;margin-top:6px;">${xs}</div>${legend}</div>`;
-}
+function openActivityDetail(detailId){
+  const el=document.getElementById(detailId);
+  if(!el)return;
+  const act=JSON.parse(decodeURIComponent(el.getAttribute('data-activity')));
 
-function blocksHtml(a,c){
-  if(!c||!c.blocks.length)return '';
-  const rec=(a.laps||[]).filter(l=>l.intensity==='RECOVERY'&&l.distance_m>=300);
-  const rows=c.blocks.map((b,i)=>{
-    const dd=c.pr?Math.round(b.pace<c.pr[0]?b.pace-c.pr[0]:b.pace>c.pr[1]?b.pace-c.pr[1]:0):null;
-    const dtxt=dd==null?'—':dd===0?'in fascia':`${dd<0?'−':'+'}${Math.abs(dd)} s`;
-    return `<div><span style="font-weight:600;">Blocco ${i+1}</span><span>${fmtPace(b.pace)}</span><span class="${dd===0?'c-ok':'c-dim'}" style="font-weight:600;">${dtxt}</span><span>${b.hr||'—'}</span></div>`;
-  }).join('');
-  const recRow=rec.length?`<div><span class="c-dim">Recuperi</span><span>${rec.map(l=>fmtPace(l.avg_pace_s_km)).join(' · ')}</span><span></span><span class="c-dim">${rec.map(l=>l.avg_hr||'—').join(' · ')}</span></div>`:'';
-  return `<div class="sec-h"><h2>Blocchi</h2>${c.pr?`<span class="sec-note">piano ${fmtRange(c.pr)}</span>`:''}</div>
-    <div class="card list tbl2"><div><span></span><span>Ritmo</span><span>Δ piano</span><span>FC</span></div>${rows}${recRow}</div>`;
-}
+  // ── Metriche chiave (sempre le stesse 8, indipendentemente dall'allenamento) ──
+  const metrics=[
+    {lbl:'Passo medio',       val: act.avg_pace_fmt?act.avg_pace_fmt+'/km':'—'},
+    {lbl:'FC media',          val: act.avg_hr!=null?Math.round(act.avg_hr)+' bpm':'—'},
+    {lbl:'FC max',            val: act.max_hr!=null?Math.round(act.max_hr)+' bpm':'—'},
+    {lbl:'Cadenza',           val: act.avg_cadence!=null?Math.round(act.avg_cadence)+' spm':'—'},
+    {lbl:'Dislivello +',      val: act.elevation_gain!=null?Math.round(act.elevation_gain)+' m':'—'},
+    {lbl:'Calorie',           val: act.calories!=null?Math.round(act.calories)+' kcal':'—'},
+    {lbl:'Liquidi persi',     val: act.sweat_loss_ml!=null?Math.round(act.sweat_loss_ml)+' ml':'—'},
+    {lbl:'Effetto aerobico',  val: act.training_effect_aerobic!=null?Number(act.training_effect_aerobic).toFixed(1)+(act.te_label?`<div class="st-sub">${teInfo(act.te_label).t}</div>`:''):'—'},
+    {lbl:'Effetto anaerobico',val: act.training_effect_anaerobic!=null?Number(act.training_effect_anaerobic).toFixed(1):'—'},
+  ];
 
-function zonesHtml(a){
-  const z=a.hr_zones||{},keys=['z1','z2','z3','z4','z5'];
-  const tot=keys.reduce((s,k)=>s+(z[k]||0),0);
-  if(!tot)return '';
-  const on=keys.filter(k=>z[k]>0);
-  return `<div class="sec-h"><h2>Tempo in zona</h2></div><div class="card">
-    <div class="act-hrzone-bar">${on.map(k=>`<div style="width:${z[k]/tot*100}%;background:${HRZONE_COLORS[k]};"></div>`).join('')}</div>
-    <div class="act-hrzone-legend">${on.map(k=>`<div class="act-hrzone-legend-item"><div class="act-hrzone-dot" style="background:${HRZONE_COLORS[k]};"></div>${HRZONE_LABELS[k]} · ${Math.round(z[k]/60)}'</div>`).join('')}</div>
-  </div>`;
-}
+  const metricsHtml=metrics.map(m=>
+    `<div class="act-metric-box"><div class="act-metric-lbl">${m.lbl}</div><div class="act-metric-val">${m.val}</div></div>`
+  ).join('');
 
-function openSeduta(ds,ai){
-  const d=DAYS[ds];
-  if(!d)return;
-  ai=ai||0;
-  const p=d.eff&&d.eff.type!=='rest'?d.eff:null;
-  const a=d.acts[ai]||null;
-  const sub=cap(fmtLong(ds))+(p?' · '+TYPE_LABEL[p.type]:'');
-  const title=p?p.summary:(a?'Corsa extra':'Riposo');
-  let body='';
-  _actMapGarminId=null;
-
-  if(a){
-    const c=ai===0?compareRun(d):null;
-    if(c&&c.text)body+=`<div class="card verdict"><div class="verdict-i" style="background:${c.ok?'var(--green)':'var(--amber)'};color:${c.ok?'#fff':'var(--text)'};">${c.ok?CHECK:'<b style="font-size:20px;">!</b>'}</div>
-      <div class="stack" style="gap:4px;"><span class="h3">${c.title}</span><span class="txt">${c.text}</span></div></div>`;
-    const km=a.distance_km||(a.distance_m||0)/1000;
-    body+=`<div class="card" style="margin-top:12px;"><div class="mx c4">
-      <div><span class="mx-l">Distanza</span><span class="mx-v">${fmtKm(km)}<small> km</small></span><span class="mx-s">${d.pk&&ai===0?'piano '+fmtKm(d.pk)+' km':'&nbsp;'}</span></div>
-      <div><span class="mx-l">Tempo</span><span class="mx-v">${fmtDur(a.duration_s)}</span><span class="mx-s">${fmtPace(a.avg_pace_s_km)}/km</span></div>
-      <div><span class="mx-l">FC media</span><span class="mx-v">${a.avg_hr?Math.round(a.avg_hr):'—'}</span><span class="mx-s">${a.max_hr?'max '+a.max_hr:'&nbsp;'}</span></div>
-      <div><span class="mx-l">Effetto</span><span class="mx-v">${a.training_effect_aerobic!=null?Number(a.training_effect_aerobic).toFixed(1).replace('.',','):'—'}</span><span class="mx-s">${a.te_label?teInfo(a.te_label).t.toLowerCase():'&nbsp;'}</span></div>
-    </div></div>`;
-    body+=lapChartHtml(a,ai===0?p:null);
-    body+=blocksHtml(a,c);
-    body+=zonesHtml(a);
-    if(p&&ai===0){
-      const steps=sentences(p.dettaglio);
-      if(steps.length)body+=`<div class="sec-h"><h2>Il piano</h2></div><div class="card steps">${steps.map(s=>`<div>${escGear(s)}.</div>`).join('')}${p._gelCount>0?`<div class="sub">Gel: ${escGear(p._gelNote)}</div>`:''}</div>`;
-    }
-    if(a.has_gps){
-      _actMapGarminId=String(a.garmin_id);
-      body+=`<div class="sec-h"><h2>Percorso</h2></div>`+(_gpsData?'<div class="act-map" id="act-map-canvas"></div>'
-        :`<form class="unlock" onsubmit="submitPrivatePassword(event,showUnlockedMap)">
-            <input type="password" placeholder="Password" aria-label="Password per la mappa" autocomplete="current-password" required>
-            <button type="submit" aria-label="Sblocca">→</button>
-            <div class="unlock-err" role="alert"></div>
-          </form>`);
-    }
-    const kv=[
-      ['Partenza',a.start_time?a.start_time.slice(11,16):null],
-      ['Scarpa',a.gear_name?escGear(a.gear_name)+(a.gear_km!=null?` · ${fmtKm(a.gear_km)} km`:''):null],
-      ['Cadenza',a.avg_cadence?Math.round(a.avg_cadence)+' passi/min':null],
-      ['Dislivello',a.elevation_gain!=null?'+'+Math.round(a.elevation_gain)+' m':null],
-      ['Effetto anaerobico',a.training_effect_anaerobic?Number(a.training_effect_anaerobic).toFixed(1).replace('.',','):null],
-      ['Calorie',a.calories?Math.round(a.calories)+' kcal':null],
-      ['Liquidi persi',a.sweat_loss_ml?Math.round(a.sweat_loss_ml)+' ml':null],
-      ['Meteo',a.weather_temp!=null&&a.weather_condition?`${a.weather_temp}°C · ${escGear(a.weather_condition)}`:null],
-    ].filter(x=>x[1]);
-    if(kv.length)body+=`<div class="sec-h"><h2>Altri dati</h2></div><div class="card list">${kv.map(([k,v])=>`<div class="kv"><span>${k}</span><span>${v}</span></div>`).join('')}</div>`;
-    if(a.laps&&a.laps.length>1){
-      body+=`<details class="more"><summary>Tutti i lap (${a.laps.length})</summary><div class="card list" style="margin-top:10px;overflow-x:auto;">
-        <table class="act-splits-table"><thead><tr><th>#</th><th>Distanza</th><th>Tempo</th><th>Ritmo</th><th>FC</th><th>Cadenza</th><th>Disl.</th></tr></thead><tbody>
-        ${a.laps.map(l=>`<tr><td>${l.lap_index}</td><td>${fmtKm(l.distance_m/1000)} km</td><td>${fmtDur(l.duration_s)}</td><td>${l.avg_pace_s_km?fmtPace(l.avg_pace_s_km):'—'}</td><td>${l.avg_hr||'—'}</td><td>${l.avg_cadence||'—'}</td><td>${l.elevation_gain!=null?'+'+l.elevation_gain:'—'}</td></tr>`).join('')}
-        </tbody></table></div></details>`;
-    }
-    if(d.acts.length>1){
-      body+=`<div class="sec-h"><h2>Altre attività del giorno</h2></div><div class="card list">${d.acts.map((x,i)=>i===ai?'':`<button class="row" onclick="openSeduta('${ds}',${i})"><div class="row-m"><span class="row-t">${fmtKm(x.distance_km)} km</span><span class="sub">${x.start_time?x.start_time.slice(11,16):''}</span></div>${CHEV}</button>`).join('')}</div>`;
-    }
-  }else if(p&&p.type==='race'){
-    body=`<div class="card stack"><span class="txt">Obiettivo sub 3:00, 4:16/km.</span></div>`;
-  }else if(p){
-    const pill=d.st==='missed'?'p-bad':d.st==='moved'?'p-info':d.st==='pending'?'p-type':'p-type';
-    const extra=d.st==='moved'?` a ${fmtDay3(d.movedTo)} ${dObj(d.movedTo).getDate()}`:'';
-    body=`<div class="card stack"><div><span class="pill ${pill}">${ST_TXT[d.st]}${extra}</span></div>${planBodyHtml(d)}</div>`;
-  }else{
-    body=`<div class="card"><span class="txt">${escGear((d.plan&&d.plan.dettaglio)||'Riposo')}</span></div>`;
+  // ── Zone FC (tempo trascorso) ──
+  let hrZoneHtml='';
+  const zones=act.hr_zones||{};
+  const totalZoneSec=Object.values(zones).reduce((s,v)=>s+v,0);
+  if(totalZoneSec>0){
+    const segs=['z1','z2','z3','z4','z5'].filter(z=>zones[z]>0).map(z=>{
+      const pct=(zones[z]/totalZoneSec*100);
+      return `<div class="act-hrzone-seg" style="width:${pct}%;background:${HRZONE_COLORS[z]};">${pct>8?HRZONE_LABELS[z]:''}</div>`;
+    }).join('');
+    const legend=['z1','z2','z3','z4','z5'].filter(z=>zones[z]>0).map(z=>
+      `<div class="act-hrzone-legend-item"><div class="act-hrzone-dot" style="background:${HRZONE_COLORS[z]};"></div>${HRZONE_LABELS[z]}: ${fmtHMS(zones[z])}</div>`
+    ).join('');
+    hrZoneHtml=`<div class="act-section-title">Tempo in zona FC</div>
+      <div class="act-hrzone-bar">${segs}</div>
+      <div class="act-hrzone-legend">${legend}</div>`;
   }
+
+  // ── Splits completi ──
+  let splitsHtml='';
+  if(act.laps && act.laps.length){
+    const rows=act.laps.map(l=>`<tr>
+      <td>#${l.lap_index}</td>
+      <td>${(l.distance_m/1000).toFixed(2)} km</td>
+      <td>${fmtHMS(l.duration_s)}</td>
+      <td>${l.avg_pace_fmt||'—'}/km</td>
+      <td>${l.avg_hr?l.avg_hr+' bpm':'—'}</td>
+      <td>${l.avg_cadence?l.avg_cadence+' spm':'—'}</td>
+      <td>${l.elevation_gain!=null?'+'+l.elevation_gain+'m':'—'}</td>
+    </tr>`).join('');
+    splitsHtml=`<div class="act-section-title">Split</div>
+      <div style="overflow-x:auto;">
+      <table class="act-splits-table">
+        <thead><tr><th>#</th><th>Dist</th><th>Tempo</th><th>Passo</th><th>FC</th><th>Cadenza</th><th>Dislivello</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </div>`;
+  }
+
+  // ── Mappa GPS ──
+  const hasGps = !!act.has_gps;
+  _actMapGarminId = hasGps ? String(act.garmin_id) : null;
+  const mapHtml = !hasGps
+    ? `<div class="act-map-empty">Nessun dato GPS per questa attività</div>`
+    : _gpsData
+      ? `<div class="act-map" id="act-map-canvas"></div>`
+      : `<form class="unlock" onsubmit="submitPrivatePassword(event,showUnlockedMap)">
+          <input type="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+          <button type="submit" aria-label="Sblocca">→</button>
+          <div class="unlock-err" role="alert"></div>
+        </form>`;
+
+  const html=`
+  <div class="act-modal-overlay" onclick="closeActivityDetail()"></div>
+  <div class="act-modal">
+    <div class="act-modal-hdr">
+      <button class="act-modal-close" onclick="closeActivityDetail()">✕</button>
+      <div class="act-modal-title">${act.name||'Attività'}</div>
+      <div class="act-modal-sub">${act.date||''} ${act.start_time?act.start_time.slice(11,16):''} · ${fmtDistKm(act.distance_m)} · ${fmtHMS(act.duration_s)}</div>
+    </div>
+    <div class="act-modal-body">
+      ${mapHtml}
+      <div class="act-metrics-grid">${metricsHtml}</div>
+      ${hrZoneHtml}
+      ${splitsHtml}
+    </div>
+  </div>`;
 
   let container=document.getElementById('act-modal-container');
   if(!container){container=document.createElement('div');container.id='act-modal-container';document.body.appendChild(container);}
-  container.innerHTML=`
-  <div class="act-modal-overlay" onclick="closeActivityDetail()"></div>
-  <div class="act-modal" role="dialog" aria-modal="true" aria-label="${escGear(title)}">
-    <div class="act-modal-hdr">
-      <button class="act-modal-close" onclick="closeActivityDetail()" aria-label="Chiudi">✕</button>
-      <div class="act-modal-sub">${sub}</div>
-      <div class="act-modal-title">${escGear(title)}</div>
-    </div>
-    <div class="act-modal-body">${body}</div>
-  </div>`;
+  container.innerHTML=html;
   document.body.style.overflow='hidden';
-  const m=container.querySelector('.act-modal');if(m)m.scrollTop=0;
-  if(_actMapGarminId&&_gpsData)renderActMap();
+
+  if(hasGps&&_gpsData)renderActMap();
 }
 
 function closeActivityDetail(){
@@ -1797,6 +1518,7 @@ async function saveFcMax(){
 
     setFcMaxStatus('Salvato! Ricarico la dashboard...','ok');
     HR_HISTORY=history;
+    renderZoneLegend();
     setTimeout(()=>{closeFcMaxModal();location.reload();},1200);
 
   }catch(e){
@@ -1829,7 +1551,6 @@ function renderStravaTodo(){
     :'';
 }
 
-showTab((location.hash||'').slice(1)||'oggi');
 sync();
 
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
