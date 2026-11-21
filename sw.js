@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matteo-firenze-v25';
+const CACHE_NAME = 'matteo-firenze-v26';
 
 // Install: skip waiting immediately
 self.addEventListener('install', event => {
