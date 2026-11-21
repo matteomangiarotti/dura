@@ -1,0 +1,22 @@
+{
+  "atleta": "Matteo",
+  "preparazioni": [
+    {
+      "id": "leuven-2026",
+      "gara": "Leuven Marathon",
+      "data": "2026-04-19",
+      "distanza": "Maratona",
+      "piano": "data/preparazioni/leuven-2026.ics",
+      "risultato": { "tempo": "3h11'58\"", "passo": "4:32/km", "fc": 179 }
+    },
+    {
+      "id": "firenze-2026",
+      "gara": "Firenze Marathon",
+      "data": "2026-11-29",
+      "distanza": "Maratona",
+      "piano": "data/piano.ics",
+      "dal": "2026-04-20",
+      "obiettivo": { "tempo": "sub 3h00", "passo": "4:16/km" }
+    }
+  ]
+}

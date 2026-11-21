@@ -1,0 +1,396 @@
+BEGIN:VCALENDAR
+PRODID:-//Dura//Archivio preparazione//IT
+VERSION:2.0
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Leuven Marathon 2026
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260216
+UID:20260216-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260217
+UID:20260217-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260218
+UID:20260218-leuven-2026@dura
+SUMMARY:Ripetute 6×600 m
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: Tot 10 km: 2 km risc + 6×600m a 4:45–4:55/km\, rec 1’30 jog + defaticamento.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260219
+UID:20260219-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260220
+UID:20260220-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260221
+UID:20260221-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260222
+UID:20260222-leuven-2026@dura
+SUMMARY:Lungo 18 km
+DESCRIPTION:Tipo: Lungo\nRitmo: 5:35–5:45/km\nDettaglio: Ritmo 5:35–5:45/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260223
+UID:20260223-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260224
+UID:20260224-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260225
+UID:20260225-leuven-2026@dura
+SUMMARY:Fartlek piramidale
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: Tot 11–12 km: 2’-3’-4’-3’-2’ forte a 4:50–5:00/km con 2’ lento.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260226
+UID:20260226-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260227
+UID:20260227-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260228
+UID:20260228-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260301
+UID:20260301-leuven-2026@dura
+SUMMARY:Lungo 20 km
+DESCRIPTION:Tipo: Lungo\nRitmo: 5:35–5:45/km\nDettaglio: Ritmo 5:35–5:45/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260302
+UID:20260302-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260303
+UID:20260303-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260304
+UID:20260304-leuven-2026@dura
+SUMMARY:Ripetute 8×800 m
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: Tot ~11 km: 8×800m a 4:50/km\, rec 2’ jog.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260305
+UID:20260305-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260306
+UID:20260306-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260307
+UID:20260307-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260308
+UID:20260308-leuven-2026@dura
+SUMMARY:Lungo 22 km
+DESCRIPTION:Tipo: Lungo\nRitmo: 5:35–5:45/km\nDettaglio: Ritmo 5:35–5:45/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260309
+UID:20260309-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260310
+UID:20260310-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260311
+UID:20260311-leuven-2026@dura
+SUMMARY:Ripetute 10×400 m
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: Tot ~10 km: 10×400m a 4:30–4:40/km\, rec 1’ jog.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260312
+UID:20260312-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260313
+UID:20260313-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260314
+UID:20260314-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260315
+UID:20260315-leuven-2026@dura
+SUMMARY:Lungo 18 km (scarico)
+DESCRIPTION:Tipo: Lungo\nRitmo: 5:40–5:50/km\nDettaglio: + Gel: 1 × 4Energy (60 min). Obiettivo: test stomaco. Ritmo 5:40–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260316
+UID:20260316-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260317
+UID:20260317-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260318
+UID:20260318-leuven-2026@dura
+SUMMARY:Progressivo controllato 12 km
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: 12 km tot: 3 km risc + 4 km a 4:40/km + 2 km easy 5:20/km + 3 km a 4:30–4:35/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260319
+UID:20260319-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260320
+UID:20260320-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260321
+UID:20260321-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260322
+UID:20260322-leuven-2026@dura
+SUMMARY:Lungo 24 km
+DESCRIPTION:Tipo: Lungo\nRitmo: 5:35–5:45/km\nDettaglio: + Gel: 1 × Nrgy Gel 22.5 (60 min) + 1 × Gel BCAA (90 min). Obiettivo: provare varietà. Ritmo 5:35–5:45/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260323
+UID:20260323-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: 5 (60 min) + 1 × BCAA (90 min). <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260323
+UID:20260323-leuven-2026@dura
+SUMMARY:Corsa
+DESCRIPTION:Tipo: Facile\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260324
+UID:20260324-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260324
+UID:20260324-leuven-2026@dura
+SUMMARY:Nuoto
+DESCRIPTION:Tipo: Facile\nRitmo: —\nDettaglio: 01 - Warm up (300 m) - 200 m facile - 100 m pull o nuoto normale 02 - Tecnica (300 m) - 6 x 50 m (rec 15") - 25 m drill + 25 m nuoto - alterna: - catch-up - sculling - nuotata lunga 03 - Main set (600 m) - 3 x 200 m (rec 30") - ritmo: controllato (circa 1:55–2:00 /100m) - focus: bracciata lunga + respirazione rilassata 04 - Qualità breve (150 m) - 6 x 25 m (rec 20") - ritmo: brillante ma controllato - focus: tecnica veloce\, non sprint 05 - Cool down (100–200 m) - nuoto molto facile
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260325
+UID:20260325-leuven-2026@dura
+SUMMARY:Medio progressivo 11 km
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: 11 km: 2 km risc 5:00–5:10/km + 3 km 4:30/km + 3 km 4:20/km + 2 km 4:10/km + 1 km 4:00–4:05/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260326
+UID:20260326-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260327
+UID:20260327-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260328
+UID:20260328-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260329
+UID:20260329-leuven-2026@dura
+SUMMARY:Lungo 26 km
+DESCRIPTION:Tipo: Lungo\nRitmo: —\nDettaglio: + Gel: 1 × Nrgy Gel 45 (60 min) + 1 × Nrgy Gel 45 caffeina (90 min) + 1 × 4Energy (120 min). Obiettivo: lungo progressivo specifico sub 3h15. Passi: km 0–12 a 4:55/km\; km 12–20 a 4:40/km\; km 20–26 a 4:30–4:35/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260330
+UID:20260330-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260331
+UID:20260331-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260401
+UID:20260401-leuven-2026@dura
+SUMMARY:Ritmo gara controllato
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: 14 km tot: 3 km risc + 8 km a 4:45/km + 3 km defaticamento.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260402
+UID:20260402-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260403
+UID:20260403-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260404
+UID:20260404-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260405
+UID:20260405-leuven-2026@dura
+SUMMARY:Lungo 30 km (picco)
+DESCRIPTION:Tipo: Lungo\nRitmo: —\nDettaglio: + Gel: 1 × Nrgy 45 (60 min) + 1 × Nrgy 45 caffeina (90 min) + 1 × BCAA (120 min) + 1 × L-Carnitina (150 min). Obiettivo: test chiave specifico sub 3h15. Passi: km 0–15 a 5:00/km\; km 15–24 a 4:40–4:45/km\; km 24–30 a 4:30–4:35/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260406
+UID:20260406-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:35–5:50/km\nDettaglio: <75% FC max. Ritmo 5:35–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260407
+UID:20260407-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260408
+UID:20260408-leuven-2026@dura
+SUMMARY:Ripetute 6×800 m
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: 6×800m a 4:50/km\, rec 2’ jog.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260409
+UID:20260409-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260410
+UID:20260410-leuven-2026@dura
+SUMMARY:Corsa facile 6 km
+DESCRIPTION:Tipo: Facile\nRitmo: 5:40–5:50/km\nDettaglio: Ritmo 5:40–5:50/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260411
+UID:20260411-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260412
+UID:20260412-leuven-2026@dura
+SUMMARY:Lungo 16 km
+DESCRIPTION:Tipo: Lungo\nRitmo: —\nDettaglio: + Gel: 1 × Nrgy 22.5 (60 min). Obiettivo: richiamo ritmo maratona a frazionato - 0-8 km facili - 8-11 km 10” più lento del ritmo maratona - 500m recupero - 11.5- 14 km ritmo maratona - 500 m recupero - 14.5-16 km 10” più veloce ritmo maratona
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260413
+UID:20260413-leuven-2026@dura
+SUMMARY:Corsa facile 8 km
+DESCRIPTION:Tipo: Facile\nRitmo: —\nDettaglio: 5 dopo 60 min. Ritmo 5:40/km.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260414
+UID:20260414-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260415
+UID:20260415-leuven-2026@dura
+SUMMARY:Fartlek
+DESCRIPTION:Tipo: Qualità\nRitmo: —\nDettaglio: 2km riscaldamento 1’ ritmo maratona 1’ recupero x15 volte
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260416
+UID:20260416-leuven-2026@dura
+SUMMARY:Riposo
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: 
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260417
+UID:20260417-leuven-2026@dura
+SUMMARY:Corsa 5 km lentissima
+DESCRIPTION:Tipo: Recovery\nRitmo: 6:00–6:15/km\nDettaglio: Ritmo 6:00–6:15/km. Solo scioglimento.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260418
+UID:20260418-leuven-2026@dura
+SUMMARY:Riposo completo pre-gara\, yoga
+DESCRIPTION:Tipo: Riposo\nRitmo: —\nDettaglio: Solo stretching.
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260419
+UID:20260419-leuven-2026@dura
+SUMMARY:GARA – Maratona 42\,195 km
+DESCRIPTION:Tipo: Gara\nRitmo: —\nDettaglio: + Gel gara: 0:50 + 1:20 + 1:50 + 2:20 + 2:50 + 3:20. Ultimi 2 con caffeina. Strategia Target sub 3h15. km 0–8 → 4:42/km (OBBLIGATORIO controllato) km 8–21 → 4:37/km (fluido\, non spingere) km 21–30 → 4:36/km (leggermente più conservativa) km 30–35 → 4:34–4:36/km (valutazione reale) km 35–42.195 → 4:28–4:32/km SOLO se hai gamba * 0:50 → Nrgy Gel 45 * 1:20 → 4Energy * 1:50 → Nrgy Gel 45 caffeina (130 mg) * 2:20 → Nrgy Gel 45 caffeina (130 mg) * 2:50 → Nrgy Gel 45
+END:VEVENT
+END:VCALENDAR

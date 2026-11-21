@@ -2,7 +2,7 @@
 """
 scarica_garmin.py — versione completa con scoring integrato
 ────────────────────────────────────────────────────────────
-1. Legge piano.ics dal repository
+1. Legge data/piano.ics dal repository
 2. Scarica nuove attivita da Garmin Connect
 3. Abbina ogni attivita al piano del giorno
 4. Calcola il voto automatico con il motore di scoring
@@ -35,7 +35,11 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-FETCH_LIMIT   = 30
+# Quante attivita' rileggere da Garmin; GARMIN_FETCH_LIMIT la alza per
+# recuperare lo storico (es. 300 per tornare a marzo 2026).
+FETCH_LIMIT   = int(os.environ.get("GARMIN_FETCH_LIMIT", "30"))
+# SOLO_LOCALE=1: scarica e salva sul PC, senza Strava e senza pubblicare.
+SOLO_LOCALE   = os.environ.get("SOLO_LOCALE") == "1"
 RUNNING_TYPES = {"running", "trail_running", "treadmill_running"}
 
 # ── FC Max history ─────────────────────────────────────────────────────────────
@@ -1363,7 +1367,7 @@ def main():
     log.info("FC max history caricata: %s", FC_MAX_HISTORY)
 
     # Carica piano ICS
-    ics_path = Path(repo_path) / "piano.ics"
+    ics_path = Path(repo_path) / "data" / "piano.ics"
     plan_index = {}
     if ics_path.exists():
         try:
@@ -1713,7 +1717,7 @@ def main():
     log.info("Aggiunte %d nuove attivita.", added)
 
     # Strava si allinea solo a scarpe appena rilette da Garmin, mai a dati vecchi.
-    if strava_sync.configured():
+    if strava_sync.configured() and not SOLO_LOCALE:
         if gear_by_activity is not None:
             try:
                 strava_sync.sync(garmin_extra.all_runs(client, gear_by_activity), repo_path)
@@ -1728,6 +1732,9 @@ def main():
         log.warning("Salute non aggiornata, restano i dati precedenti: %s", e)
 
     save_tokens(client)
+    if SOLO_LOCALE:
+        log.info("SOLO_LOCALE: dati salvati sul PC, niente pubblicazione.")
+        return
     if not git_push(repo_path):
         sys.exit(1)
     if IN_GITHUB:

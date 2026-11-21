@@ -3,7 +3,9 @@
 garmin_extra.py — dati che ogni sincronizzazione rilegge interi da Garmin
 ─────────────────────────────────────────────────────────────────────────
 Scarpe e foto (data/gear.json, data/gear/) e salute cifrata
-(data/salute.enc.json: sonno, HRV, passi, zone FC).
+(data/salute.enc.json: sonno, HRV, passi, zone FC, previsioni gara).
+Sonno e passi si accumulano: lo storico resta tutto, si riscaricano solo gli
+ultimi giorni (e una volta sola tutto da GARMIN_START, se manca).
 Se Garmin non risponde restano i dati gia' salvati.
 """
 
@@ -24,8 +26,9 @@ SALUTE_RELATIVE_PATH = Path("data") / "salute.enc.json"
 GEAR_RELATIVE_PATH = Path("data") / "gear.json"
 PHOTOS_RELATIVE_PATH = Path("data") / "gear"
 PHOTO_MAX_PX = 720
-SLEEP_DAYS = 14   # notti mostrate nel grafico del sonno
-HISTORY_DAYS = 56  # giorni mostrati per HRV e passi
+SLEEP_DAYS = 14   # notti riscaricate a ogni giro (Garmin a volte le corregge)
+HISTORY_DAYS = 56  # giorni riscaricati per HRV e passi
+GARMIN_START = date(2026, 3, 5)  # primo giorno con l'orologio Garmin
 
 
 def _profile_pk(client, activities):
@@ -145,9 +148,10 @@ def _clock(local_ms):
     return datetime.fromtimestamp(local_ms / 1000, timezone.utc).strftime("%H:%M")
 
 
-def _fetch_sleep(client, today):
+def _fetch_sleep(client, today, since=None):
     nights = []
-    for offset in range(SLEEP_DAYS - 1, -1, -1):
+    days = (today - since).days + 1 if since else SLEEP_DAYS
+    for offset in range(days - 1, -1, -1):
         day = (today - timedelta(days=offset)).isoformat()
         night = client.get_sleep_data(day) or {}
         dto = night.get("dailySleepDTO") or {}
@@ -162,6 +166,7 @@ def _fetch_sleep(client, today):
             "deep": _hours(dto.get("deepSleepSeconds")),
             "light": _hours(dto.get("lightSleepSeconds")),
             "rem": _hours(dto.get("remSleepSeconds")),
+            "awake": _hours(dto.get("awakeSleepSeconds")),
             "score": ((dto.get("sleepScores") or {}).get("overall") or {}).get("value"),
             "need": round((need.get("actual") or 0) / 60, 2),
         })
@@ -178,10 +183,10 @@ def _fetch_hrv(client, today):
     return rows, hrv_range
 
 
-def _fetch_steps(client, today):
+def _fetch_steps(client, today, since=None):
     # Oggi e' ancora in corso: si legge solo fino a ieri.
     end = today - timedelta(days=1)
-    start = end - timedelta(days=HISTORY_DAYS - 1)
+    start = since or end - timedelta(days=HISTORY_DAYS - 1)
     return [{"date": r["calendarDate"], "steps": r["totalSteps"], "goal": r.get("stepGoal")}
             for r in client.get_daily_steps(start.isoformat(), end.isoformat())
             if r.get("totalSteps") is not None]
@@ -197,10 +202,29 @@ def _fetch_zones(client):
     }
 
 
-def _merge_by_date(old_rows, new_rows, keep):
+def _fetch_race_predictions(client):
+    # Tempi previsti da Garmin per 5 km, 10 km, mezza e maratona (secondi).
+    data = client.get_race_predictions()
+    if isinstance(data, list):
+        data = data[-1] if data else {}
+    keys = {"5k": "time5K", "10k": "time10K", "21k": "timeHalfMarathon", "42k": "timeMarathon"}
+    pred = {k: data.get(v) for k, v in keys.items() if data.get(v)}
+    if pred:
+        pred["date"] = data.get("calendarDate")
+    return pred
+
+
+def _merge_by_date(old_rows, new_rows, keep=None):
     merged = {row["date"]: row for row in old_rows or []}
     merged.update({row["date"]: row for row in new_rows})
-    return [merged[d] for d in sorted(merged)[-keep:]]
+    days = sorted(merged)
+    return [merged[d] for d in (days[-keep:] if keep else days)]
+
+
+def _since(rows):
+    # Se lo storico non arriva a GARMIN_START, la prima volta si scarica tutto.
+    first = min((r["date"] for r in rows or []), default=None)
+    return GARMIN_START if not first or first > GARMIN_START.isoformat() else None
 
 
 def refresh_salute(client, repo_path, password):
@@ -217,24 +241,30 @@ def refresh_salute(client, repo_path, password):
             log.warning("%s non aggiornato, restano i dati precedenti: %s", label, e)
 
     def sleep():
-        salute["sleep"] = _merge_by_date(salute.get("sleep"), _fetch_sleep(client, today), SLEEP_DAYS)
+        salute["sleep"] = _merge_by_date(salute.get("sleep"), _fetch_sleep(client, today, _since(salute.get("sleep"))))
 
     def hrv():
         rows, hrv_range = _fetch_hrv(client, today)
-        salute["hrv"] = _merge_by_date(salute.get("hrv"), rows, HISTORY_DAYS)
+        salute["hrv"] = _merge_by_date(salute.get("hrv"), rows)
         if hrv_range:
             salute["hrvRange"] = hrv_range
 
     def steps():
-        salute["steps"] = _merge_by_date(salute.get("steps"), _fetch_steps(client, today), HISTORY_DAYS)
+        salute["steps"] = _merge_by_date(salute.get("steps"), _fetch_steps(client, today, _since(salute.get("steps"))))
 
     def zones():
         salute["garminZones"] = _fetch_zones(client)
+
+    def races():
+        pred = _fetch_race_predictions(client)
+        if pred:
+            salute["racePredictions"] = pred
 
     update("Sonno", sleep)
     update("HRV", hrv)
     update("Passi", steps)
     update("Zone FC", zones)
+    update("Previsioni gara", races)
 
     if salute != previous:
         salute["updated"] = today.isoformat()

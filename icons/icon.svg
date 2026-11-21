@@ -1,5 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="80" fill="#1565C0"/>
-  <text x="256" y="200" font-family="Arial Black, sans-serif" font-size="130" font-weight="900" fill="white" text-anchor="middle" dominant-baseline="middle">M</text>
-  <text x="256" y="360" font-family="Arial, sans-serif" font-size="70" font-weight="700" fill="rgba(255,255,255,0.85)" text-anchor="middle" dominant-baseline="middle">×FI</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><title>Dura</title><rect width="256" height="256" rx="58" fill="#007AFF"/><path fill="#FFFFFF" d="M53 184L129.25 72L166.25 72L203 184L166 184L141.28 108.67L90 184Z"/></svg>

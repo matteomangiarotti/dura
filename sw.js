@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matteo-firenze-v25';
+const CACHE_NAME = 'dura-v1';
 
 // Install: skip waiting immediately
 self.addEventListener('install', event => {

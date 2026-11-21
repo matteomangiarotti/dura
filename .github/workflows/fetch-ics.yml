@@ -14,12 +14,12 @@ jobs:
         run: |
           curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
             "${{ secrets.CALENDAR_ICS_URL }}" \
-            -o piano.ics --fail --silent --show-error
+            -o data/piano.ics --fail --silent --show-error
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add piano.ics
+          git add data/piano.ics
           git diff --staged --quiet || git commit -m "chore: aggiorna piano.ics [skip ci]"
           git push
           
