@@ -303,7 +303,7 @@ html{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font
 <div class="chart-wrap"><div class="chart-title">Tempo in zona per settimana (%)</div><div class="chart-c"><canvas id="cZoneW"></canvas></div></div>
 <div class="chart-wrap"><div class="chart-title">Training effect · ultime 8 settimane</div><div class="chart-c"><canvas id="cTE"></canvas></div><div class="act-hrzone-legend" id="te-legend" style="margin-top:12px;"></div></div>
 <div class="block-title">Scarpe</div>
-<div><div id="scarpe-list"></div><div class="strava-todo" id="strava-todo" role="status"></div><div class="data-note">Km e numero di attività da Garmin Connect. La barra indica la durata impostata su Garmin. Tocca una scarpa per foto e attività.</div></div>
+<div><div id="scarpe-list"></div><div class="strava-todo" id="strava-todo" role="status"></div><div class="data-note">Km e numero di attività da Garmin Connect, più i km fatti prima di Garmin presi da Strava. La barra indica la durata impostata su Garmin. Tocca una scarpa per foto e attività.</div></div>
 </div>
 <div id="panel-lifestyle" class="panel">
 <form class="unlock" id="recupero-empty" style="display:none;" onsubmit="submitPrivatePassword(event)">
@@ -772,12 +772,28 @@ const GRID_Y={color:'#eeeef1'};
 
 const GEAR_JSON='./data/gear.json';
 let GEAR_LIST=[];
+// Km fatti prima di usare Garmin (solo Strava): file fisso, preso una volta
+// dall'archivio Strava. Si sommano ai km di Garmin di ogni scarpa.
+const GEAR_PRIMA_GARMIN_JSON='./data/gear_prima_garmin.json';
 async function loadGear(){
+  let list=[],prima={};
   try{
     const r=await fetch(fresh(GEAR_JSON),{cache:'no-store'});
-    if(r.ok)return await r.json();
+    if(r.ok)list=await r.json();
   }catch(e){console.warn('gear.json non disponibile:',e);}
-  return [];
+  try{
+    const r=await fetch(fresh(GEAR_PRIMA_GARMIN_JSON),{cache:'no-store'});
+    if(r.ok)prima=(await r.json()).scarpe||{};
+  }catch(e){console.warn('gear_prima_garmin.json non disponibile:',e);}
+  list.forEach(g=>{
+    const p=prima[g.name];
+    if(!p)return;
+    g.prima_garmin=p;
+    g.km=Math.round((g.km+p.km)*10)/10;
+    g.activities=(g.activities||0)+p.corse;
+    if(!g.first_used||p.dal<g.first_used)g.first_used=p.dal;
+  });
+  return list;
 }
 
 const fmtGearKm=v=>Number(v).toLocaleString('it-IT',{maximumFractionDigits:1});
@@ -819,15 +835,22 @@ function openGearDetail(i){
   const stats=[
     {l:'Distanza',v:fmtGearKm(g.km)+' km',s:pct!==null?`${pct}% di ${fmtGearKm(g.max_km)} km`:''},
     {l:'Attività',v:g.activities,s:g.last_used?'ultima '+fmtDtShort(g.last_used):''},
-    {l:'Giorni d\'uso',v:new Set(g.runs.map(r=>r.date)).size,s:g.first_used?'dal '+fmtDtShort(g.first_used):''},
+    {l:'Giorni d\'uso',v:new Set(g.runs.map(r=>r.date)).size+(g.prima_garmin?g.prima_garmin.corse:0),s:g.first_used?'dal '+fmtDtShort(g.first_used):''},
   ].map(statHtml).join('');
+  const p=g.prima_garmin;
   const runs=g.runs.map(r=>`<div class="gear-run">
       <div>
         <div class="gear-run-name">${escGear(r.name||'Corsa')}</div>
         <div class="gear-run-sub">${fmtDtShort(r.date)}</div>
       </div>
       <div class="gear-run-km">${fmtGearKm(r.km)} km</div>
-    </div>`).join('');
+    </div>`).join('')+(p?`<div class="gear-run">
+      <div>
+        <div class="gear-run-name">Prima di Garmin (da Strava)</div>
+        <div class="gear-run-sub">${p.corse} corse · ${fmtDtShort(p.dal)} – ${fmtDtShort(p.al)}</div>
+      </div>
+      <div class="gear-run-km">${fmtGearKm(p.km)} km</div>
+    </div>`:'');
   const state=gearState(g)==='retired'?'Ritirata':'Attiva';
   let container=document.getElementById('act-modal-container');
   if(!container){container=document.createElement('div');container.id='act-modal-container';document.body.appendChild(container);}
