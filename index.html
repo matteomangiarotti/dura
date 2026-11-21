@@ -38,7 +38,7 @@
 --t-easy:#007AFF;--t-recovery:#248A3D;--t-lungo:#8944AB;--t-qualita:#C93400;--t-race:#1D1D1F;
 }
 html{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.35;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%;}
-body{background:var(--bg);}
+body{background:var(--bg);overflow-anchor:none;}
 button{font-family:inherit;color:inherit;}
 
 /* ── Barra in alto: bianca, logo blu al centro, menu a sinistra ── */
@@ -77,7 +77,8 @@ body.menu-open .drawer-bg{opacity:1;pointer-events:auto;}
 .nav-item::after{content:"";width:7px;height:7px;border-right:2px solid var(--text3);border-top:2px solid var(--text3);transform:rotate(45deg);}
 .nav-item.active{color:var(--brand);}
 .nav-item.active::after{border-color:var(--brand);}
-.drawer-foot{margin-top:auto;padding:0 var(--gut);display:flex;align-items:center;gap:7px;color:var(--brand);font-size:12px;}
+.drawer-data{margin-top:auto;padding:0 var(--gut) 10px;font-size:12px;color:var(--text2);}
+.drawer-foot{padding:0 var(--gut);display:flex;align-items:center;gap:7px;color:var(--brand);font-size:12px;}
 .drawer-foot svg{width:18px;height:18px;}
 .drawer-foot span{color:var(--text2);}
 
@@ -179,11 +180,11 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 .dot.miss{background:var(--red);}
 .dot.rest{background:rgba(118,118,128,.2);}
 .dot.fut{background:none;box-shadow:inset 0 0 0 1.5px var(--text3);}
-.dot.today{background:none;box-shadow:inset 0 0 0 2px var(--brand);}
+.dot.today{background:none;box-shadow:inset 0 0 0 1.5px var(--text3);} /* oggi come i giorni da fare: grigio, bianco in mezzo */
 .dot.race{background:var(--text);}
 .dot.nodata{background:rgba(118,118,128,.12);}
 .wk-chev{width:7px;height:7px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);margin-right:3px;transition:transform .2s;}
-.wk.open .wk-chev{transform:rotate(45deg);}
+.wk.open>.wk-hdr .wk-chev{transform:rotate(45deg);}
 .wk-body{padding-bottom:6px;}
 
 .tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
@@ -404,6 +405,11 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 
 .wk-past{border-top:.5px solid var(--sep);padding-left:12px;}
 .wk-past .wk:last-child{border-bottom:none;}
+
+.wk-hdr.flash{background:rgba(0,122,255,.06);transition:background .4s;}
+.panel.active{animation:pagein .3s ease;}
+@keyframes pagein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.wk-chev,.n-chev,.prep-chev{transition:transform .3s cubic-bezier(.25,.8,.25,1);}
 </style>
 
 
@@ -442,6 +448,7 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
     <button class="nav-item" data-page="allenamento" onclick="showTab('allenamento')">Progressi</button>
     <button class="nav-item" data-page="lifestyle" onclick="showTab('lifestyle')">Lifestyle</button>
   </nav>
+  <div class="drawer-data" id="h-sub"></div>
   <div class="drawer-foot" style="--mark-fg:#fff;"><svg aria-hidden="true"><use href="#dura-mark"/></svg><span>Dura</span></div>
 </aside>
 
@@ -454,7 +461,6 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
     <div class="prep-menu" id="prep-menu" role="menu" hidden></div>
   </div>
   <div class="h-meta" id="h-meta">&nbsp;</div>
-  <div class="h-sub" id="h-sub">&nbsp;</div>
 </section>
 
 <section class="zone-legend" id="zone-legend-wrap" aria-label="Zone cardio">
@@ -575,6 +581,7 @@ function renderHero(){
   const pill=done?'':`<span class="h-pill">${quandoStr(p.data).replace(/^tra /,'')}</span>`;
   document.getElementById('h-meta').innerHTML=`<span>${parts.filter(Boolean).map(escGear).join(' · ')}</span>${pill}${pred?`<span class="h-pred">${escGear(pred)}</span>`:''}`;
   document.title=done?`${p.gara} · Dura`:'Dura';
+  requestAnimationFrame(fitIntro);
 }
 
 async function selectPrep(id){
@@ -901,16 +908,16 @@ function buildDashboard(activities){
     const byDay={};rowsAndCards.forEach(x=>{if(!(x.date in byDay)||RANK[x.st]>RANK[byDay[x.date]])byDay[x.date]=x.st;});
     const dots=Object.keys(byDay).sort().map(k=>`<span class="dot ${byDay[k]}"></span>`).join('');
 
-    const card=document.createElement('div');card.className='wk'+(isCurr?' open':'');
+    const card=document.createElement('div');card.className='wk';
     card.innerHTML=`
-      <div class="wk-hdr" onclick="toggleW('wb${wi}')" role="button" aria-expanded="${isCurr}">
+      <div class="wk-hdr" onclick="toggleW('wb${wi}')" role="button" aria-expanded="false">
         <div class="wk-l">
           <div class="wk-num">Settimana ${wi+1}${isCurr?'<span class="wk-now">In corso</span>':''}</div>
           <div class="wk-period">${fmtDt(mon)} – ${fmtDt(endStr)} · ${metaTxt}${pctStr?' · '+pctStr:''}</div>
         </div>
         <div class="wk-dots" aria-hidden="true">${dots}</div><span class="wk-chev"></span>
       </div>
-      <div id="wb${wi}" class="wk-body" style="display:${isCurr?'block':'none'}">
+      <div id="wb${wi}" class="wk-body" style="display:none">
         <table class="tbl">
           <colgroup><col style="width:88px"><col><col style="width:44%"></colgroup>
           <thead><tr><th>Giorno</th><th>Piano</th><th>Garmin</th></tr></thead>
@@ -1242,7 +1249,7 @@ function monthRowHtml(k,ns){
     <div class="night-det month-det" hidden>${ns.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(nightHtml).join('')}</div>
   </div>`;
 }
-function toggleNight(btn){const det=btn.nextElementSibling,open=det.hidden;det.hidden=!open;btn.setAttribute('aria-expanded',open);btn.parentElement.classList.toggle('open',open);}
+function toggleNight(btn){const det=btn.nextElementSibling,open=det.hidden;slide(det,open,'hidden');btn.setAttribute('aria-expanded',open);btn.parentElement.classList.toggle('open',open);}
 
 function renderRecupero(){
   const has=SALUTE&&SALUTE.sleep&&SALUTE.sleep.length;
@@ -1477,16 +1484,52 @@ function saveSyncToken(){
 
 // Dalla "Prossima seduta" alla sua settimana: la apre e porta al giorno.
 function goToDay(ds){
-  const els=[...document.querySelectorAll(`[data-day="${ds}"]`)];
-  if(!els.length)return;
-  const body=els[0].closest('.wk-body');
-  if(body&&body.style.display==='none')toggleW(body.id);
-  const el=els.find(e=>e.offsetParent!==null)||els[0];
-  el.scrollIntoView({behavior:'smooth',block:'center'});
-  el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1600);
+  const el=document.querySelector(`[data-day="${ds}"]`);
+  const wk=el&&el.closest('.wk');
+  if(!wk)return;
+  const hdr=wk.querySelector('.wk-hdr');
+  hdr.scrollIntoView({behavior:'smooth',block:'center'});
+  hdr.classList.add('flash');setTimeout(()=>hdr.classList.remove('flash'),1600);
 }
-function togglePast(hdr){const box=hdr.nextElementSibling,open=box.hidden;box.hidden=!open;hdr.setAttribute('aria-expanded',open);hdr.parentElement.classList.toggle('open',open);}
-function toggleW(id){const el=document.getElementById(id),open=el.style.display==='none';el.style.display=open?'block':'none';const wk=el.parentElement;wk.classList.toggle('open',open);const h=wk.querySelector('.wk-hdr');if(h)h.setAttribute('aria-expanded',open);}
+function togglePast(hdr){const box=hdr.nextElementSibling,open=box.hidden;slide(box,open,'hidden');hdr.setAttribute('aria-expanded',open);hdr.parentElement.classList.toggle('open',open);}
+// Apre o chiude un blocco con un'animazione morbida dell'altezza.
+// mode: 'display' (style.display) oppure 'hidden' (attributo hidden).
+function slide(el,open,mode){
+  const show=()=>{if(mode==='display')el.style.display='block';else el.hidden=false;};
+  const hide=()=>{if(mode==='display')el.style.display='none';else el.hidden=true;};
+  const done=()=>{el.style.height='';el.style.opacity='';el.style.overflow='';el.style.transition='';if(!open)hide();};
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){open?show():hide();return;}
+  clearTimeout(el._slideT);
+  el.style.overflow='hidden';
+  if(open){show();const h=el.scrollHeight;el.style.height='0px';el.style.opacity='0';el.offsetHeight;
+    el.style.transition='height .34s cubic-bezier(.25,.8,.25,1),opacity .28s ease';el.style.height=h+'px';el.style.opacity='1';}
+  else{el.style.height=el.scrollHeight+'px';el.offsetHeight;
+    el.style.transition='height .28s cubic-bezier(.25,.8,.25,1),opacity .2s ease';el.style.height='0px';el.style.opacity='0';}
+  el._slideT=setTimeout(done,360);
+}
+
+// Prima schermata: gara, zone e seduta di oggi. Lo spazio che avanza si
+// distribuisce tra i blocchi, cosi' le settimane cominciano appena sotto il
+// bordo dello schermo senza un vuoto in fondo.
+function fitIntro(){
+  const zl=document.getElementById('zone-legend-wrap'),nw=document.getElementById('next-workout'),hd=document.querySelector('.wk-list-hdr');
+  if(!zl||!nw||!hd)return;
+  zl.style.paddingTop=nw.style.paddingTop=hd.style.paddingTop='';
+  if(document.body.dataset.page!=='piano'||!nw.innerHTML.trim())return;
+  const top=hd.getBoundingClientRect().top+window.scrollY;
+  const extra=Math.min(window.innerHeight+2-top,window.innerHeight*.5);
+  if(extra<=0)return;
+  // un po' d'aria tra i blocchi (al massimo 36 px), il resto prima delle settimane
+  const g=Math.min(Math.round(extra*.25),36);
+  zl.style.paddingTop=g+'px';
+  nw.style.paddingTop=g+'px';
+  hd.style.paddingTop=Math.round(extra-2*g)+'px';
+}
+// Sul telefono la barra del browser cambia l'altezza mentre scorri: si
+// ricalcola solo se cambia la larghezza.
+let _fitW=window.innerWidth;
+window.addEventListener('resize',()=>{if(window.innerWidth!==_fitW){_fitW=window.innerWidth;fitIntro();}});
+function toggleW(id){const el=document.getElementById(id),open=el.style.display==='none';slide(el,open,'display');const wk=el.parentElement;wk.classList.toggle('open',open);const h=wk.querySelector('.wk-hdr');if(h)h.setAttribute('aria-expanded',open);}
 const PAGE_NAMES={piano:'Programma',allenamento:'Progressi',lifestyle:'Lifestyle'};
 function showTab(n){
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
@@ -1495,6 +1538,7 @@ function showTab(n){
   // i grafici disegnati mentre la pagina era nascosta prendono ora la misura giusta
   requestAnimationFrame(()=>Object.values(Chart.instances||{}).forEach(c=>c.resize()));
   document.getElementById('page-ey').textContent=n==='lifestyle'?'':PAGE_NAMES[n];
+  requestAnimationFrame(fitIntro);
   toggleMenu(false);
   try{history.replaceState(null,'',n==='piano'?location.pathname+location.search:'#'+n);}catch(e){}
   window.scrollTo(0,0);
