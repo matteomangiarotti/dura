@@ -42,7 +42,7 @@ body{background:var(--bg);}
 button{font-family:inherit;color:inherit;}
 
 /* ── Barra in alto: bianca, logo blu al centro, menu a sinistra ── */
-.topbar{position:relative;z-index:30;background:#fff;border-bottom:.5px solid var(--sep);padding-top:env(safe-area-inset-top);}
+.topbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:.5px solid var(--sep);padding-top:env(safe-area-inset-top);}
 .topbar-in{max-width:920px;margin:0 auto;padding:0 var(--gut);height:52px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;}
 .icon-btn{width:36px;height:36px;margin-left:-8px;display:flex;align-items:center;justify-content:center;border:none;background:none;border-radius:50%;cursor:pointer;color:var(--text);}
 .icon-btn:hover{background:var(--fill);}
@@ -106,6 +106,7 @@ body.menu-open .drawer-bg{opacity:1;pointer-events:auto;}
 .pm-sub{font-size:13px;color:var(--text2);display:block;margin-top:1px;}
 .pm-live{color:var(--brand);font-weight:500;}
 .h-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;font-size:15px;color:var(--text2);}
+.h-pred{flex-basis:100%;font-size:13px;color:var(--text2);margin-top:-4px;}
 .h-pill{font-size:13px;font-weight:600;color:#fff;background:var(--brand);padding:3px 10px;border-radius:999px;}
 .h-sub{font-size:12px;color:var(--text3);margin-top:10px;}
 body[data-page="lifestyle"] .prep,body[data-page="lifestyle"] .h-meta,body[data-page="lifestyle"] .h-sub,body[data-page="lifestyle"] .zone-legend{display:none;}
@@ -187,9 +188,9 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 .tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 .tbl>thead>tr>th{padding:6px 14px 6px 0;font-size:12px;font-weight:500;color:var(--text2);text-align:left;}
 .tbl>tbody>tr>td{padding:18px 14px 18px 0;border-top:.5px solid var(--border2);vertical-align:top;}
-.tbl>tbody>tr.today-row .dn,.tbl>tbody>tr.today-row .dd{color:var(--brand);}
-.dn{font-weight:600;font-size:15px;}
-.dd{font-size:13px;color:var(--text2);}
+.tbl>tbody>tr.today-row .dn{display:inline-block;background:var(--brand);color:#fff;padding:0 8px;border-radius:999px;margin-left:-8px;}
+.dn{font-weight:700;font-size:15px;color:var(--brand);}
+.dd{font-size:15px;color:var(--brand);}
 .bdg{display:inline-flex;align-items:center;gap:5px;font-size:12px;margin-top:4px;color:var(--text2);}
 .bdg::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--text3);}
 .b-ok::before{background:var(--green);}
@@ -207,11 +208,13 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 .real-box .detail-btn{position:absolute;right:0;top:0;margin:0;}
 
 .m-day-cards{display:none;}
-.m-card{padding:18px 0;border-top:.5px solid var(--border2);}
-.m-card.today-card .m-card-day,.m-card.today-card .m-card-date{color:var(--brand);}
+.m-card{padding:24px 0;border-top:.5px solid var(--border2);}
+.m-card.today-card .m-card-dl{background:var(--brand);color:#fff;padding:1px 10px;border-radius:999px;margin-left:-10px;}
+.m-card.today-card .m-card-dl span{color:#fff;}
 .m-card-hdr{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;}
-.m-card-day{font-size:13px;font-weight:600;}
-.m-card-date{font-size:13px;color:var(--text2);}
+.m-card-dl{display:inline-flex;gap:5px;align-items:baseline;}
+.m-card-day{font-size:15px;font-weight:700;color:var(--brand);}
+.m-card-date{font-size:15px;color:var(--brand);}
 .m-card-hdr .bdg{margin:0 0 0 auto;}
 .m-card .real-box{margin-top:8px;padding-top:8px;border-top:.5px dashed var(--border2);}
 
@@ -390,6 +393,9 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 .ls-nav button:disabled{color:var(--text3);cursor:default;}
 .n-cnt{font-size:12px;color:var(--text3);font-weight:400;margin-left:4px;text-transform:none;}
 @media(max-width:640px){.ls-bar{flex-direction:column;align-items:stretch;}.ls-seg{grid-template-columns:repeat(4,1fr);}.ls-nav{justify-content:space-between;}}
+
+.weeks-hint{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 0 6px;border:none;background:none;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;}
+.weeks-hint .wk-chev{margin:-4px 0 0;transform:rotate(45deg);}
 </style>
 
 
@@ -450,7 +456,9 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 
 
 
-<div id="panel-piano" class="panel active"><div id="next-workout"></div><div id="weeks-wrap"></div>
+<div id="panel-piano" class="panel active"><div id="next-workout"></div>
+  <button class="weeks-hint" id="weeks-hint" onclick="document.getElementById('weeks-wrap').scrollIntoView({behavior:'smooth',block:'start'})">Tutte le settimane<span class="wk-chev"></span></button>
+  <div id="weeks-wrap"></div>
   <div class="legend" aria-label="Legenda"><span><i class="dot done"></i>Fatta</span><span><i class="dot moved"></i>Spostata o extra</span><span><i class="dot miss"></i>Mancata</span><span><i class="dot fut"></i>Da fare</span><span><i class="dot rest"></i>Riposo</span><span><i class="dot race"></i>Gara</span></div>
 </div>
 <div id="panel-allenamento" class="panel">
@@ -554,10 +562,11 @@ function renderHero(){
   document.getElementById('h-title').textContent=p.gara;
   const rp=SALUTE&&SALUTE.racePredictions;
   const predKey={'Maratona':'42k','Mezza maratona':'21k','10 km':'10k','5 km':'5k'}[p.distanza];
-  const pred=!done&&rp&&predKey&&rp[predKey]?'previsione Garmin '+fmtSec(rp[predKey]):'';
-  const parts=done?[fmtLong(p.data,true),r&&r.tempo,r&&r.passo]:[fmtLong(p.data),o&&o.tempo?'obiettivo '+o.tempo:'',pred];
+  const pred=!done&&rp&&predKey&&rp[predKey]?'Previsione Garmin '+fmtSec(rp[predKey]):'';
+  const parts=done?[fmtLong(p.data,true),r&&r.tempo,r&&r.passo]:[fmtLong(p.data),o&&o.tempo?'obiettivo '+o.tempo:''];
   const pill=done?'':`<span class="h-pill">${quandoStr(p.data).replace(/^tra /,'')}</span>`;
-  document.getElementById('h-meta').innerHTML=`<span>${parts.filter(Boolean).map(escGear).join(' · ')}</span>${pill}`;
+  document.getElementById('h-meta').innerHTML=`<span>${parts.filter(Boolean).map(escGear).join(' · ')}</span>${pill}${pred?`<span class="h-pred">${escGear(pred)}</span>`:''}`;
+  fitIntro();
   document.title=done?`${p.gara} · Dura`:'Dura';
 }
 
@@ -572,6 +581,7 @@ async function selectPrep(id){
   buildDashboard(ALL_ACTIVITIES);
   renderNextWorkout();
   renderHero();
+  requestAnimationFrame(fitIntro);
 }
 
 // ── BLOCCHI SEDUTA ──────────────────────────────────────────────────────────
@@ -871,7 +881,7 @@ function buildDashboard(activities){
         <td>${realBox}</td>
       </tr>`;
       const mobileCard=`<div class="m-card${isToday?' today-card':''}" data-day="${p.date}">
-        <div class="m-card-hdr"><span class="m-card-day">${DN[di]}</span><span class="m-card-date">${d.getDate()} ${fmtDt(p.date).split(' ')[1]}</span>${badge}</div>
+        <div class="m-card-hdr"><span class="m-card-dl"><span class="m-card-day">${DN[di]}</span><span class="m-card-date">${d.getDate()} ${fmtDt(p.date).split(' ')[1]}</span></span>${badge}</div>
         ${planHtml(p,isRace)}
         ${realBox}
       </div>`;
@@ -1335,6 +1345,7 @@ async function sync(){
   renderStravaTodo();
   renderNextWorkout();
   renderHero();
+  requestAnimationFrame(fitIntro);
   if(!SALUTE)restorePrivateUnlock();
   setStatus('ok','Aggiorna');
   document.getElementById('loading').classList.add('hidden');
@@ -1456,6 +1467,22 @@ function goToDay(ds){
   el.scrollIntoView({behavior:'smooth',block:'center'});
   el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1600);
 }
+// Prima schermata pulita: le settimane cominciano appena sotto il bordo dello
+// schermo; in fondo resta solo il richiamo "Tutte le settimane".
+function fitIntro(){
+  const hint=document.getElementById('weeks-hint');
+  if(!hint||document.body.dataset.page!=='piano')return;
+  hint.style.paddingTop='';
+  // quanto spingere giu' perche' l'elenco delle settimane parta appena sotto il bordo
+  // (padding e non margin: il margine si fonderebbe con quello della scheda sopra)
+  const wrapTop=document.getElementById('weeks-wrap').getBoundingClientRect().top+window.scrollY;
+  const gap=Math.max(0,Math.min(window.innerHeight+2-wrapTop,window.innerHeight*.6));
+  hint.style.paddingTop=(10+gap)+'px';
+}
+// Sul telefono la barra del browser che si nasconde cambia l'altezza durante lo
+// scorrimento: si ricalcola solo se cambia la larghezza (rotazione, finestra).
+let _fitW=window.innerWidth;
+window.addEventListener('resize',()=>{if(window.innerWidth!==_fitW){_fitW=window.innerWidth;fitIntro();}});
 function toggleW(id){const el=document.getElementById(id),open=el.style.display==='none';el.style.display=open?'block':'none';const wk=el.parentElement;wk.classList.toggle('open',open);const h=wk.querySelector('.wk-hdr');if(h)h.setAttribute('aria-expanded',open);}
 const PAGE_NAMES={piano:'Programma',allenamento:'Progressi',lifestyle:'Lifestyle'};
 function showTab(n){
@@ -1465,6 +1492,7 @@ function showTab(n){
   // i grafici disegnati mentre la pagina era nascosta prendono ora la misura giusta
   requestAnimationFrame(()=>Object.values(Chart.instances||{}).forEach(c=>c.resize()));
   document.getElementById('page-ey').textContent=n==='lifestyle'?'':PAGE_NAMES[n];
+  requestAnimationFrame(fitIntro);
   toggleMenu(false);
   try{history.replaceState(null,'',n==='piano'?location.pathname+location.search:'#'+n);}catch(e){}
   window.scrollTo(0,0);
