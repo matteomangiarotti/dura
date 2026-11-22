@@ -538,9 +538,9 @@ html[data-dir="back"]::view-transition-new(root){animation-name:vt-in-back;}
   <div class="sub-t first">Previsioni gara di Garmin</div>
   <div class="pred-box" id="pred-stats"></div>
   <div class="stat-grid" id="forma-stats"></div>
-  <div class="chart-wrap"><div class="chart-title">Tempo in zona · ultime 4 settimane</div><div class="zone-scroll" id="forma-zones"></div><div class="data-note" id="forma-zones-note"></div></div>
+  <div class="chart-wrap"><div class="chart-title">Tempo in zona</div><div class="zone-scroll" id="forma-zones"></div><div class="data-note" id="forma-zones-note"></div></div>
   <div class="chart-wrap"><div class="chart-title">Tempo in zona per settimana</div><div class="chart-c"><canvas id="cZoneW"></canvas></div></div>
-  <div class="chart-wrap"><div class="chart-title">Training effect · ultime 8 settimane</div><div class="chart-c"><canvas id="cTE"></canvas></div><div class="act-hrzone-legend" id="te-legend" style="margin-top:12px;"></div></div>
+  <div class="chart-wrap"><div class="chart-title">Training effect medio per settimana</div><div class="chart-c"><canvas id="cTE"></canvas></div><div class="act-hrzone-legend" id="te-legend" style="margin-top:12px;"></div></div>
   <div class="block-title">Piano e reale</div>
   <div class="stat-grid" id="comp-stats"></div>
   <div class="chart-wrap"><div class="chart-title">Km piano e reali</div><div class="chart-c"><canvas id="cKm"></canvas></div></div>
@@ -896,6 +896,9 @@ function buildDashboard(activities){
   const weekMap={};
   PIANO.forEach(p=>{const w=getWMon(p.date);if(!weekMap[w])weekMap[w]=[];weekMap[w].push(p);});
   const sortedW=Object.keys(weekMap).sort();
+  // Periodo della preparazione scelta: da lunedi' della S1 a oggi, o fino alla gara se e' finita.
+  const lastDay=PIANO.reduce((m,p)=>p.date>m?p.date:m,'');
+  PREP_RANGE={weeks:sortedW,from:sortedW[0]||TODAY,to:lastDay&&lastDay<TODAY?lastDay:TODAY};
   const wrap=document.getElementById('weeks-wrap');wrap.innerHTML='';
   let currentWeekIdx=-1;
   sortedW.forEach((mon,wi)=>{const end=new Date(mon);end.setDate(end.getDate()+6);if(mon<=TODAY&&TODAY<=end.toISOString().slice(0,10))currentWeekIdx=wi;});
@@ -1178,26 +1181,34 @@ function openGearDetail(i){
   document.body.style.overflow='hidden';
 }
 
+// Tutta la pagina Progressi usa lo stesso periodo: la preparazione scelta in alto
+// (impostato da buildDashboard), con le settimane S1, S2... del piano.
+let PREP_RANGE=null;
 function renderForma(activities){
-  const acts=(activities||[]).filter(a=>a.date&&a.date<=TODAY);
-  const recent=acts.filter(a=>a.date>=dateAdd(TODAY,-28));
-  const peak=recent.reduce((b,a)=>a.max_hr&&(!b||a.max_hr>b.max_hr)?a:b,null);
-  const withTe=recent.filter(a=>a.training_effect_aerobic!=null);
+  if(!PREP_RANGE)return;
+  const {from,to}=PREP_RANGE;
+  const acts=(activities||[]).filter(a=>a.date&&a.date>=from&&a.date<=to);
+  const weeks=PREP_RANGE.weeks.filter(w=>w<=to);
+  const wLabel=w=>'S'+(PREP_RANGE.weeks.indexOf(w)+1);
+  const inWeek=(a,w)=>a.date>=w&&a.date<=dateAdd(w,6);
+  const peak=acts.reduce((b,a)=>a.max_hr&&(!b||a.max_hr>b.max_hr)?a:b,null);
+  const withTe=acts.filter(a=>a.training_effect_aerobic!=null);
   const vo2=SALUTE&&SALUTE.vo2max;
 
   document.getElementById('forma-stats').innerHTML=[
     {l:'FC max in uso',v:WATCH_ZONES.fcMax+' bpm',s:'impostata sull\'orologio'},
     {l:vo2&&vo2.estimate?'VO₂max (stima)':'VO₂max',v:vo2?(vo2.estimate?'~':'')+vo2.value:'—',s:vo2?(vo2.estimate?'Stima VDOT, test 10 km 7/10':'Garmin'):'sblocca in Lifestyle'},
-    {l:'Picco FC 4 settimane',v:peak?peak.max_hr+' bpm':'—',s:peak?fmtDtShort(peak.date):'nessuna corsa'},
+    {l:'Picco FC',v:peak?peak.max_hr+' bpm':'—',s:peak?fmtDtShort(peak.date):'nessuna corsa'},
     {l:'Training effect medio',v:withTe.length?avg(withTe.map(a=>a.training_effect_aerobic)).toFixed(1):'—',s:withTe.length?`anaerobico ${avg(withTe.map(a=>a.training_effect_anaerobic||0)).toFixed(1)} · ${withTe.length} corse`:'nessuna corsa'},
   ].map(statHtml).join('');
 
   // Tabella zone
   const zones=buildZones();
   const keys=['z1','z2','z3','z4','z5'];
-  const secs=keys.map(k=>recent.reduce((s,a)=>s+((a.hr_zones&&a.hr_zones[k])||0),0));
+  const zoneActs=acts.filter(a=>a.date>=WATCH_DATA_FROM);
+  const secs=keys.map(k=>zoneActs.reduce((s,a)=>s+((a.hr_zones&&a.hr_zones[k])||0),0));
   const totSec=secs.reduce((s,x)=>s+x,0);
-  document.getElementById('forma-zones').innerHTML=`<table class="zone-tbl">
+  document.getElementById('forma-zones').innerHTML=!totSec?'<div class="ls-empty">Nessun tempo in zona con le soglie dell\'orologio in questa preparazione</div>':`<table class="zone-tbl">
     <thead><tr><th>Zona</th><th>Tempo</th><th>Quota</th></tr></thead>
     <tbody>${zones.map((z,i)=>{
       const pct=totSec?secs[i]/totSec*100:0;
@@ -1209,38 +1220,41 @@ function renderForma(activities){
     }).join('')}</tbody></table>`;
 
   document.getElementById('forma-zones-note').textContent=
-    `Soglie dell'orologio Garmin: FC max ${WATCH_ZONES.fcMax}, FC a riposo ${WATCH_ZONES.rest}.`;
+    `Soglie dell'orologio Garmin: FC max ${WATCH_ZONES.fcMax}, FC a riposo ${WATCH_ZONES.rest}.`+
+    (from<WATCH_DATA_FROM?` Tempo in zona dal ${fmtDtShort(WATCH_DATA_FROM)}: prima l'orologio usava altre soglie.`:'');
 
   // Tempo in zona per settimana
   const byWeek={};
-  acts.filter(a=>a.date>=WATCH_DATA_FROM).forEach(a=>{
+  zoneActs.forEach(a=>{
     const tot=keys.reduce((s,k)=>s+((a.hr_zones&&a.hr_zones[k])||0),0);
     if(!tot)return;
     const w=getWMon(a.date);
     if(!byWeek[w])byWeek[w]={z1:0,z2:0,z3:0,z4:0,z5:0};
     keys.forEach(k=>byWeek[w][k]+=(a.hr_zones[k]||0));
   });
-  const weeks=Object.keys(byWeek).sort().slice(-10);
-  const weekPct=(w,k)=>{const t=keys.reduce((s,x)=>s+byWeek[w][x],0);return +(byWeek[w][k]/t*100).toFixed(1);};
+  document.getElementById('cZoneW').closest('.chart-wrap').style.display=totSec?'':'none';
+  const weekPct=(w,k)=>{if(!byWeek[w])return null;const t=keys.reduce((s,x)=>s+byWeek[w][x],0);return +(byWeek[w][k]/t*100).toFixed(1);};
   newChart('cZoneW',{type:'bar',data:{
-    labels:weeks.map(fmtDtShort),
+    labels:weeks.map(wLabel),
     datasets:keys.map(k=>({label:HRZONE_LABELS[k],data:weeks.map(w=>weekPct(w,k)),backgroundColor:HRZONE_COLORS[k],borderColor:'#fff',borderWidth:1,borderRadius:3}))
   },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-    plugins:{legend:LEGEND_BOTTOM,tooltip:{callbacks:{title:i=>'Settimana del '+i[0].label,label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(0)}%`}}},
+    plugins:{legend:LEGEND_BOTTOM,tooltip:{callbacks:{title:i=>`${i[0].label} · settimana del ${fmtDtShort(weeks[i[0].dataIndex])}`,label:c=>`${c.dataset.label}: ${c.parsed.y.toFixed(0)}%`}}},
     scales:{x:{...AXIS_X,stacked:true},y:{stacked:true,min:0,max:100,ticks:{callback:v=>v+'%',font:{size:12}},grid:GRID_Y}}}});
 
   // Training effect
-  const teRuns=acts.filter(a=>a.training_effect_aerobic!=null&&a.date>=dateAdd(TODAY,-56)).sort((a,b)=>a.date.localeCompare(b.date));
+  // media delle corse di ogni settimana, sulle stesse settimane degli altri grafici
+  const teW=weeks.map(w=>withTe.filter(a=>inWeek(a,w)));
+  const teAvg=(rs,f)=>rs.length?+avg(rs.map(f)).toFixed(2):null;
   newChart('cTE',{type:'bar',data:{
-    labels:teRuns.map(a=>fmtDtShort(a.date)),
+    labels:weeks.map(wLabel),
     datasets:[
-      {label:'Aerobico',data:teRuns.map(a=>a.training_effect_aerobic),backgroundColor:'#007AFF',borderRadius:4,order:2},
-      {label:'Anaerobico',data:teRuns.map(a=>a.training_effect_anaerobic||0),backgroundColor:'#C7C7CC',borderRadius:4,order:1},
+      {label:'Aerobico',data:teW.map(rs=>teAvg(rs,a=>a.training_effect_aerobic)),backgroundColor:'#007AFF',borderRadius:4,order:2},
+      {label:'Anaerobico',data:teW.map(rs=>teAvg(rs,a=>a.training_effect_anaerobic||0)),backgroundColor:'#C7C7CC',borderRadius:4,order:1},
     ]
   },options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},datasets:{bar:{grouped:false,barPercentage:.75,categoryPercentage:.9,maxBarThickness:20}},
     plugins:{legend:{display:false},tooltip:{callbacks:{
-      title:i=>`${i[0].label} · ${teRuns[i[0].dataIndex].name}`,
-      label:c=>c.datasetIndex===0?`Aerobico ${c.parsed.y.toFixed(1)} · ${teInfo(teRuns[c.dataIndex].te_label).t}`:`Anaerobico ${c.parsed.y.toFixed(1)}`,
+      title:i=>{const n=teW[i[0].dataIndex].length;return `${i[0].label} · ${n} ${n===1?'corsa':'corse'}`;},
+      label:c=>`${c.datasetIndex===0?'Aerobico':'Anaerobico'} ${c.parsed.y.toFixed(1)}`,
     }}},
     scales:{x:AXIS_X,y:{min:0,max:5,ticks:{stepSize:1,font:{size:12}},grid:GRID_Y}}}});
   document.getElementById('te-legend').innerHTML=`<div class="act-hrzone-legend-item"><div class="act-hrzone-dot" style="background:#007AFF;"></div>Aerobico</div><div class="act-hrzone-legend-item"><div class="act-hrzone-dot" style="background:#C7C7CC;"></div>Anaerobico</div>`;
