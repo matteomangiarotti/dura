@@ -1000,18 +1000,47 @@ def parse_laps(laps_raw):
         })
     return parsed
 
-def fetch_gps_polyline(client, activity_id, max_points=150):
-    """Scarica il percorso GPS (lat/lon) di un'attivita, diradato a max_points
-    punti per tenere il JSON leggero. Ritorna [] se non disponibile (es.
-    corsa su tapis roulant)."""
+GPS_TOLERANCE_M = 2  # scarto massimo dal percorso vero dopo la semplificazione
+
+
+def simplify_polyline(points, tolerance_m=GPS_TOLERANCE_M):
+    """Douglas-Peucker: tiene solo i punti che servono a non allontanarsi dal
+    percorso piu' di tolerance_m metri (fitti in curva, radi sui rettilinei)."""
+    if len(points) < 3:
+        return points
+    kx = 111320 * math.cos(math.radians(points[0][0]))
+    ky = 110540
+    xy = [(lon * kx, lat * ky) for lat, lon in points]
+    keep = [False] * len(points)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(points) - 1)]
+    while stack:
+        a, b = stack.pop()
+        (x1, y1), (x2, y2) = xy[a], xy[b]
+        dx, dy = x2 - x1, y2 - y1
+        length = math.hypot(dx, dy)
+        best, best_i = 0.0, None
+        for i in range(a + 1, b):
+            x, y = xy[i]
+            d = (abs(dy * x - dx * y + x2 * y1 - y2 * x1) / length) if length else math.hypot(x - x1, y - y1)
+            if d > best:
+                best, best_i = d, i
+        if best_i is not None and best > tolerance_m:
+            keep[best_i] = True
+            stack += [(a, best_i), (best_i, b)]
+    return [p for p, k in zip(points, keep) if k]
+
+
+def fetch_gps_polyline(client, activity_id):
+    """Scarica il percorso GPS (lat/lon) di un'attivita' a piena risoluzione
+    (un punto al secondo), lo semplifica entro GPS_TOLERANCE_M metri e
+    arrotonda a 5 decimali (~1 m). Ritorna [] se non disponibile (es. corsa
+    su tapis roulant)."""
     try:
-        detail = client.get_activity_details(activity_id, maxpoly=max_points)
+        detail = client.get_activity_details(activity_id, maxpoly=10000)
         poly = (detail or {}).get("geoPolylineDTO", {}).get("polyline") or []
         points = [[p["lat"], p["lon"]] for p in poly if p.get("lat") is not None and p.get("lon") is not None]
-        if len(points) > max_points:
-            step = len(points) / max_points
-            points = [points[round(i*step)] for i in range(max_points)]
-        return points
+        return [[round(lat, 5), round(lon, 5)] for lat, lon in simplify_polyline(points)]
     except Exception as e:
         log.warning("    GPS non disponibile: %s", e)
         return []

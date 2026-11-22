@@ -13,6 +13,7 @@ USO:
     python backfill_dettagli.py           # ultimi 7 giorni
     python backfill_dettagli.py 14        # ultimi 14 giorni
     python backfill_dettagli.py all       # TUTTE le attivita da sempre
+    python backfill_dettagli.py all --solo-gps   # riscarica solo i percorsi
 """
 
 import sys
@@ -27,7 +28,9 @@ import scarica_garmin as sg
 
 
 def main():
-    days_arg = sys.argv[1] if len(sys.argv) > 1 else "7"
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    solo_gps = "--solo-gps" in sys.argv[1:]
+    days_arg = args[0] if args else "7"
 
     sg.load_env()
     email     = os.environ.get("GARMIN_EMAIL", "").strip()
@@ -75,6 +78,15 @@ def main():
         if not act_id:
             continue
         print(f"→ {record.get('date')}  {record.get('name')}  (id: {act_id})")
+
+        if solo_gps:
+            if record.get("type") == "treadmill_running":
+                continue
+            gps = sg.fetch_gps_polyline(client, act_id)
+            if gps:  # se Garmin non risponde si tiene il percorso che c'era
+                record["gps_polyline"] = gps
+            print(f"    GPS: {len(gps)} punti")
+            continue
 
         # Splits aggiornati (cadenza, dislivello, potenza per lap)
         laps_raw = []

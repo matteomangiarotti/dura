@@ -15,8 +15,9 @@
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.1/dist/maplibre-gl.css">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.1/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 <style>
 /* ── Dura ────────────────────────────────────────────────────────────────────
    Carattere di sistema Apple (SF Pro; Inter dove non c'e').
@@ -271,6 +272,19 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 .act-modal-close{position:absolute;top:16px;right:16px;background:rgba(118,118,128,.12);border:none;width:28px;height:28px;border-radius:50%;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center;}
 .act-modal-body{padding:4px 20px 22px;}
 .act-map{width:100%;height:210px;border-radius:12px;overflow:hidden;background:var(--fill);margin-bottom:16px;}
+.heatmap{width:100%;height:380px;border-radius:12px;overflow:hidden;background:#F2F2F0;}
+@media (max-width:600px){.heatmap{height:320px;}}
+.maplibregl-ctrl-group:not(:empty){box-shadow:0 1px 4px rgba(0,0,0,.12);border-radius:10px;overflow:hidden;}
+.maplibregl-ctrl-group button{width:32px;height:32px;}
+.maplibregl-ctrl-group button+button{border-top:.5px solid var(--sep);}
+.maplibregl-ctrl-attrib{font-size:11px;}
+.maplibregl-ctrl-attrib.maplibregl-compact{background:rgba(255,255,255,.8);}
+.maplibregl-ctrl-attrib a{color:var(--text2);}
+.maplibregl-ctrl-attrib-button{opacity:.45;}
+.maplibregl-cooperative-gesture-screen{font-family:var(--font);font-size:15px;background:rgba(0,0,0,.35);}
+.map-countries{margin-top:10px;font-size:12px;line-height:1.6;color:var(--text2);}
+.map-countries:empty{display:none;}
+.heatmap-lock{background:var(--fill);border-radius:12px;padding:24px 0 16px;}
 .act-map-empty{width:100%;height:90px;border-radius:12px;background:var(--fill);display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:13px;margin-bottom:16px;}
 .act-metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px;}
 .act-metric-box{background:var(--fill);border-radius:12px;padding:9px 12px;}
@@ -409,6 +423,44 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
 .wk-hdr.flash{background:rgba(0,122,255,.06);transition:background .4s;}
 .panel.active{animation:pagein .3s ease;}
 @keyframes pagein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── Cambio pagina (View Transitions del browser) ──
+   Barra, titolo della gara e zone restano fermi; il contenuto della pagina
+   entra di lato (da destra andando avanti nel menu, da sinistra tornando
+   indietro) con la curva delle schede di iOS; la scritta della pagina scivola
+   in alto. Dove il browser non lo supporta resta il cambio di prima. */
+.topbar{view-transition-name:topbar;}
+.drawer{view-transition-name:drawer;}
+.drawer-bg{view-transition-name:drawer-bg;}
+.page-head{view-transition-name:page-head;}
+.page-ey{view-transition-name:page-ey;}
+/* il contenuto delle zone, non il riquadro: in Programma il riquadro ha spazio in piu' sopra */
+.zone-legend>.sec-hdr{view-transition-name:zones-hdr;}
+#zone-legend-chips{view-transition-name:zones-chips;}
+html.vt-run .drawer,html.vt-run .drawer-bg{transition:none;}
+/* intestazione ferma solo tra Programma e Progressi (in Lifestyle e' diversa) e
+   solo se era in vista; altrimenti si muove col resto della pagina */
+html.vt-loose .page-head,html.vt-loose .page-ey,html.vt-loose .zone-legend>.sec-hdr,html.vt-loose #zone-legend-chips{view-transition-name:none;}
+/* dopo il primo cambio animato la vecchia dissolvenza della pagina non serve
+   piu' (e ripartirebbe a fine transizione, come se la pagina si ricaricasse) */
+html.vt-used .panel.active{animation:none;}
+::view-transition-group(*){animation-duration:.42s;animation-timing-function:cubic-bezier(.32,.72,0,1);}
+::view-transition-group(topbar){animation:none;}
+::view-transition-old(topbar){display:none;}
+::view-transition-new(topbar){animation:none;}
+::view-transition-old(root){animation:vt-fade-out .16s ease both;}
+::view-transition-new(root){animation:vt-in-fwd .42s cubic-bezier(.32,.72,0,1) both;}
+html[data-dir="back"]::view-transition-new(root){animation-name:vt-in-back;}
+::view-transition-old(page-ey){animation:vt-ey-out .2s ease both;}
+::view-transition-new(page-ey){animation:vt-ey-in .4s cubic-bezier(.32,.72,0,1) .05s both;}
+::view-transition-group(drawer){animation-duration:.32s;}
+::view-transition-old(drawer-bg){animation:vt-fade-out .28s ease both;}
+::view-transition-new(drawer-bg){animation:none;opacity:0;}
+@keyframes vt-fade-out{to{opacity:0}}
+@keyframes vt-in-fwd{from{opacity:0;transform:translateX(24px)}}
+@keyframes vt-in-back{from{opacity:0;transform:translateX(-24px)}}
+@keyframes vt-ey-out{to{opacity:0;transform:translateY(-6px)}}
+@keyframes vt-ey-in{from{opacity:0;transform:translateY(6px)}}
 .wk-chev,.n-chev,.prep-chev{transition:transform .3s cubic-bezier(.25,.8,.25,1);}
 
 .weeks-hint{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:0 0 8px;border:none;background:none;font-size:12px;color:var(--text3);cursor:pointer;}
@@ -493,6 +545,10 @@ body[data-page="lifestyle"] .page-title-only{display:block;}
   <div class="chart-wrap"><div class="chart-title">Sedute fatte per settimana</div><div class="chart-c"><canvas id="cComp"></canvas></div></div>
   <div class="block-title">Scarpe</div>
   <div><div id="scarpe-list"></div><div class="strava-todo" id="strava-todo" role="status"></div><div class="data-note">Km e attività da Garmin Connect, più i km fatti prima di Garmin (da Strava). La barra indica la durata impostata su Garmin.</div></div>
+  <div class="block-title">Mappa</div>
+  <div id="heatmap-wrap"></div>
+  <div class="map-countries" id="heatmap-countries"></div>
+  <div class="data-note" id="heatmap-note"></div>
 </div>
 <div id="panel-lifestyle" class="panel">
   <form class="unlock" id="recupero-empty" style="display:none;" onsubmit="submitPrivatePassword(event)">
@@ -1537,7 +1593,16 @@ let _fitW=window.innerWidth;
 window.addEventListener('resize',()=>{if(window.innerWidth!==_fitW){_fitW=window.innerWidth;fitIntro();}});
 function toggleW(id){const el=document.getElementById(id),open=el.style.display==='none';slide(el,open,'display');const wk=el.parentElement;wk.classList.toggle('open',open);const h=wk.querySelector('.wk-hdr');if(h)h.setAttribute('aria-expanded',open);}
 const PAGE_NAMES={piano:'Programma',allenamento:'Progressi',lifestyle:'Lifestyle'};
-function showTab(n){
+const PAGE_ORDER=['piano','allenamento','lifestyle'];
+function showTab(n,animate=true){
+  const from=document.body.dataset.page,root=document.documentElement;
+  if(!animate||from===n||!document.startViewTransition||matchMedia('(prefers-reduced-motion: reduce)').matches){applyTab(n);return;}
+  root.dataset.dir=PAGE_ORDER.indexOf(n)<PAGE_ORDER.indexOf(from)?'back':'fwd';
+  root.classList.add('vt-run','vt-used');
+  root.classList.toggle('vt-loose',window.scrollY>40||n==='lifestyle'||from==='lifestyle');
+  document.startViewTransition(()=>applyTab(n)).finished.finally(()=>root.classList.remove('vt-run','vt-loose'));
+}
+function applyTab(n){
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+n));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===n));
   document.body.dataset.page=n;
@@ -1545,6 +1610,7 @@ function showTab(n){
   requestAnimationFrame(()=>Object.values(Chart.instances||{}).forEach(c=>c.resize()));
   document.getElementById('page-ey').textContent=n==='lifestyle'?'':PAGE_NAMES[n];
   requestAnimationFrame(fitIntro);
+  if(n==='allenamento')requestAnimationFrame(renderHeatmap);
   toggleMenu(false);
   try{history.replaceState(null,'',n==='piano'?location.pathname+location.search:'#'+n);}catch(e){}
   window.scrollTo(0,0);
@@ -1591,6 +1657,7 @@ async function unlockPrivateData(material){
   renderRecupero();
   renderPredictions();
   renderHero();
+  renderHeatmap();
 }
 
 async function restorePrivateUnlock(){
@@ -1611,6 +1678,7 @@ async function lockPrivateData(){
   renderRecupero();
   renderPredictions();
   renderHero();
+  renderHeatmap();
 }
 
 async function submitPrivatePassword(e,onUnlock){
@@ -1638,21 +1706,166 @@ function showUnlockedMap(form){
   renderActMap();
 }
 
-function renderActMap(){
-  const entry=_gpsData&&_gpsData[_actMapGarminId];
+async function renderActMap(){
+  const id=_actMapGarminId,entry=_gpsData&&_gpsData[id];
   const latlngs=entry&&entry.gps_polyline;
   if(!latlngs||latlngs.length<2)return;
-  setTimeout(()=>{
-    if(!document.getElementById('act-map-canvas'))return;
-    if(_actMapInstance){_actMapInstance.remove();_actMapInstance=null;}
-    const map=L.map('act-map-canvas',{zoomControl:false,attributionControl:false});
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
-    const poly=L.polyline(latlngs,{color:'#007AFF',weight:4,opacity:.9}).addTo(map);
-    map.fitBounds(poly.getBounds(),{padding:[16,16]});
-    L.circleMarker(latlngs[0],{radius:5,color:'#fff',fillColor:'#34C759',fillOpacity:1,weight:2}).addTo(map);
-    L.circleMarker(latlngs[latlngs.length-1],{radius:5,color:'#fff',fillColor:'#FF3B30',fillOpacity:1,weight:2}).addTo(map);
-    _actMapInstance=map;
-  },50);
+  await new Promise(r=>setTimeout(r,50));
+  const el=document.getElementById('act-map-canvas');
+  if(!el)return;
+  if(_actMapInstance){_actMapInstance.remove();_actMapInstance=null;}
+  const coords=latlngs.map(p=>[p[1],p[0]]);
+  let map;
+  try{map=await makeMap(el,{bounds:boundsOf(coords),fitBoundsOptions:{padding:20}});}
+  catch(e){console.warn('Mappa non disponibile:',e);return;}
+  if(id!==_actMapGarminId||!el.isConnected){map.remove();return;}
+  _actMapInstance=map;
+  map.on('load',()=>{
+    map.addSource('run',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:coords}}});
+    map.addLayer({id:'run',type:'line',source:'run',layout:{'line-join':'round','line-cap':'round'},paint:{'line-color':'#007AFF','line-width':4,'line-opacity':.9}});
+    map.addSource('ends',{type:'geojson',data:{type:'FeatureCollection',features:[
+      {type:'Feature',properties:{c:'#34C759'},geometry:{type:'Point',coordinates:coords[0]}},
+      {type:'Feature',properties:{c:'#FF3B30'},geometry:{type:'Point',coordinates:coords[coords.length-1]}}]}});
+    map.addLayer({id:'ends',type:'circle',source:'ends',paint:{'circle-radius':5,'circle-color':['get','c'],'circle-stroke-color':'#fff','circle-stroke-width':2}});
+  });
+}
+
+// ── MAPPE ────────────────────────────────────────────────────────────────────
+// Base: OpenFreeMap (dati OpenStreetMap), gratuita e senza chiave. Stile chiaro
+// "positron" senza le scritte: si tolgono i livelli di testo prima di disegnarla.
+const MAP_STYLE_URL='https://tiles.openfreemap.org/styles/positron';
+let _mapStyleP=null;
+function mapStyle(){
+  return _mapStyleP||(_mapStyleP=fetch(MAP_STYLE_URL).then(r=>{if(!r.ok)throw new Error('stile mappa '+r.status);return r.json();})
+    .then(s=>{s.layers=s.layers.filter(l=>l.type!=='symbol');return s;})
+    .catch(e=>{_mapStyleP=null;throw e;}));
+}
+const MAP_LOCALE={
+  'CooperativeGesturesHandler.WindowsHelpText':'Ctrl + rotella per ingrandire',
+  'CooperativeGesturesHandler.MacHelpText':'⌘ + rotella per ingrandire',
+  'CooperativeGesturesHandler.MobileHelpText':'Usa due dita per muovere la mappa',
+  'NavigationControl.ZoomIn':'Ingrandisci','NavigationControl.ZoomOut':'Riduci',
+};
+async function makeMap(container,opts={}){
+  const map=new maplibregl.Map({container,style:await mapStyle(),attributionControl:{compact:true},
+    cooperativeGestures:true,dragRotate:false,pitchWithRotate:false,touchPitch:false,maxZoom:18,locale:MAP_LOCALE,...opts});
+  map.touchZoomRotate.disableRotation();
+  map.keyboard.disableRotation();
+  // crediti chiusi dietro la (i): si aprono toccandola
+  map.once('load',()=>{const a=map.getContainer().querySelector('.maplibregl-ctrl-attrib');if(a)a.classList.remove('maplibregl-compact-show');});
+  return map;
+}
+function boundsOf(coords){
+  let w=180,s=90,e=-180,n=-90;
+  coords.forEach(([x,y])=>{if(x<w)w=x;if(x>e)e=x;if(y<s)s=y;if(y>n)n=y;});
+  return [[w,s],[e,n]];
+}
+
+// Mappa di tutte le corse: ogni percorso e' una linea blu molto trasparente,
+// dove si passa spesso le linee si sommano e il blu si fa pieno. Si costruisce
+// solo a pagina visibile e solo con i percorsi sbloccati.
+let _heatMap=null,_heatBusy=false;
+async function renderHeatmap(){
+  const wrap=document.getElementById('heatmap-wrap'),note=document.getElementById('heatmap-note');
+  if(!wrap)return;
+  if(!_gpsData){
+    if(_heatMap){_heatMap.remove();_heatMap=null;}
+    document.getElementById('heatmap-countries').innerHTML='';
+    if(!wrap.querySelector('form'))wrap.innerHTML=`<form class="unlock heatmap-lock" onsubmit="submitPrivatePassword(event)">
+        <input type="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+        <button type="submit" aria-label="Sblocca">→</button>
+        <div class="unlock-err" role="alert"></div>
+      </form>`;
+    note.textContent='I percorsi sono cifrati: si vedono solo con la password.';
+    return;
+  }
+  if(!document.getElementById('panel-allenamento').classList.contains('active'))return;
+  if(_heatMap){_heatMap.resize();return;}
+  if(_heatBusy)return;
+
+  const runs=ALL_ACTIVITIES
+    .map(a=>({date:a.date,coords:((_gpsData[a.garmin_id]||{}).gps_polyline||[]).map(p=>[p[1],p[0]])}))
+    .filter(r=>r.coords.length>1);
+  if(!runs.length){wrap.innerHTML='<div class="act-map-empty">Nessun percorso GPS</div>';note.textContent='';return;}
+
+  // Si apre sulla zona dove corri adesso: tra le zone (celle di ~10 km) quella
+  // con piu' corse negli ultimi 90 giorni, a parita' quella con piu' corse in tutto.
+  const cell=c=>Math.round(c[1]*10)+','+Math.round(c[0]*10);
+  const since=dateAdd(TODAY,-90),zones={};
+  runs.forEach(r=>{const k=cell(r.coords[0]),z=zones[k]||(zones[k]={recent:0,all:0,coords:[]});z.all++;if(r.date>=since)z.recent++;z.coords.push(...r.coords);});
+  const home=Object.values(zones).sort((a,b)=>b.recent-a.recent||b.all-a.all)[0];
+
+  _heatBusy=true;
+  wrap.innerHTML='<div class="heatmap" id="heatmap-canvas"></div>';
+  try{
+    const map=await makeMap('heatmap-canvas',{bounds:boundsOf(home.coords),fitBoundsOptions:{padding:16}});
+    map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+    map.on('load',()=>{
+      map.addSource('runs',{type:'geojson',data:{type:'FeatureCollection',
+        features:runs.map(r=>({type:'Feature',properties:{},geometry:{type:'LineString',coordinates:r.coords}}))}});
+      map.addLayer({id:'runs',type:'line',source:'runs',layout:{'line-join':'round','line-cap':'round'},paint:{
+        'line-color':'#007AFF',
+        'line-width':['interpolate',['linear'],['zoom'],6,1,12,2,15,3.5,18,6],
+        'line-opacity':['interpolate',['linear'],['zoom'],6,.5,12,.28,16,.22],
+      }});
+    });
+    _heatMap=map;
+  }catch(e){
+    console.warn('Mappa non disponibile:',e);
+    wrap.innerHTML='<div class="act-map-empty">Mappa non disponibile, riprova più tardi</div>';
+  }finally{_heatBusy=false;}
+
+  note.textContent='';
+  document.getElementById('heatmap-countries').innerHTML=`<div>${runs.length} corse con GPS</div>`;
+  if(_heatMap)renderCountries(runs).catch(e=>console.warn('Paesi non disponibili:',e));
+}
+
+// Paesi in cui hai corso: il punto di partenza di ogni corsa si confronta,
+// qui nel browser, con i confini del mondo (Natural Earth 1:50m, pubblici).
+// Le coordinate non escono dal dispositivo.
+const WORLD_URL='https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json';
+// codici ISO 3166 numerici (quelli di world-atlas) → due lettere, per il nome in italiano
+const ISO_N2A='004AF008AL010AQ012DZ016AS020AD024AO028AG031AZ032AR036AU040AT044BS048BH050BD051AM052BB056BE060BM064BT068BO070BA072BW074BV076BR084BZ086IO090SB092VG096BN100BG104MM108BI112BY116KH120CM124CA132CV136KY140CF144LK148TD152CL156CN158TW162CX166CC170CO174KM175YT178CG180CD184CK188CR191HR192CU196CY203CZ204BJ208DK212DM214DO218EC222SV226GQ231ET232ER233EE234FO238FK239GS242FJ246FI248AX250FR254GF258PF260TF262DJ266GA268GE270GM275PS276DE288GH292GI296KI300GR304GL308GD312GP316GU320GT324GN328GY332HT334HM336VA340HN344HK348HU352IS356IN360ID364IR368IQ372IE376IL380IT384CI388JM392JP398KZ400JO404KE408KP410KR414KW417KG418LA422LB426LS428LV430LR434LY438LI440LT442LU446MO450MG454MW458MY462MV466ML470MT474MQ478MR480MU484MX492MC496MN498MD499ME500MS504MA508MZ512OM516NA520NR524NP528NL531CW533AW534SX535BQ540NC548VU554NZ558NI562NE566NG570NU574NF578NO580MP581UM583FM584MH585PW586PK591PA598PG600PY604PE608PH612PN616PL620PT624GW626TL630PR634QA638RE642RO643RU646RW652BL654SH659KN660AI662LC663MF666PM670VC674SM678ST682SA686SN688RS690SC694SL702SG703SK704VN705SI706SO710ZA716ZW724ES728SS729SD732EH740SR744SJ748SZ752SE756CH760SY762TJ764TH768TG772TK776TO780TT784AE788TN792TR795TM796TC798TV800UG804UA807MK818EG826GB831GG832JE833IM834TZ840US850VI854BF858UY860UZ862VE876WF882WS887YE894ZM';
+let _worldP=null;
+function worldCountries(){
+  return _worldP||(_worldP=fetch(WORLD_URL).then(r=>{if(!r.ok)throw new Error('confini '+r.status);return r.json();}).then(topo=>{
+    const a2={};for(let i=0;i<ISO_N2A.length;i+=5)a2[ISO_N2A.slice(i,i+3)]=ISO_N2A.slice(i+3,i+5);
+    const it=new Intl.DisplayNames(['it'],{type:'region'});
+    return topojson.feature(topo,topo.objects.countries).features.filter(f=>f.geometry).map(f=>{
+      const polys=f.geometry.type==='Polygon'?[f.geometry.coordinates]:f.geometry.coordinates;
+      let w=180,s=90,e=-180,n=-90;
+      polys.forEach(p=>p[0].forEach(([x,y])=>{if(x<w)w=x;if(x>e)e=x;if(y<s)s=y;if(y>n)n=y;}));
+      return {name:a2[f.id]?it.of(a2[f.id]):f.properties.name,polys,bbox:[w,s,e,n]};
+    });
+  }).catch(e=>{_worldP=null;throw e;}));
+}
+function inRing([x,y],ring){
+  let inside=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+    const [xi,yi]=ring[i],[xj,yj]=ring[j];
+    if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)inside=!inside;
+  }
+  return inside;
+}
+function countryOf(pt,countries){
+  const near=(c,m)=>pt[0]>=c.bbox[0]-m&&pt[0]<=c.bbox[2]+m&&pt[1]>=c.bbox[1]-m&&pt[1]<=c.bbox[3]+m;
+  const hit=countries.find(c=>near(c,0)&&c.polys.some(p=>inRing(pt,p[0])&&!p.slice(1).some(h=>inRing(pt,h))));
+  if(hit)return hit;
+  // sulla costa o a ridosso di un confine i contorni 1:50m sono approssimati:
+  // si prende il paese col bordo piu' vicino (entro ~0,3 gradi)
+  let best=null,bd=.3*.3;
+  countries.filter(c=>near(c,.3)).forEach(c=>c.polys.forEach(p=>p[0].forEach(([x,y])=>{
+    const d=(x-pt[0])**2+(y-pt[1])**2;if(d<bd){bd=d;best=c;}
+  })));
+  return best;
+}
+async function renderCountries(runs){
+  const countries=await worldCountries();
+  const by={};
+  runs.forEach(r=>{const c=countryOf(r.coords[0],countries);if(c)by[c.name]=(by[c.name]||0)+1;});
+  const list=Object.entries(by).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'it'));
+  if(!_heatMap||!list.length)return;
+  document.getElementById('heatmap-countries').innerHTML=`<div>${runs.length} corse con GPS</div>`+list.map(([n,k])=>`<div>${n} ${k}</div>`).join('');
 }
 
 function fmtHMS(totSec){
@@ -1928,7 +2141,7 @@ function renderStravaTodo(){
 }
 
 // #allenamento o #lifestyle nell'indirizzo aprono subito quella sezione
-const _h=location.hash.slice(1);if(['piano','allenamento','lifestyle'].includes(_h))showTab(_h);
+const _h=location.hash.slice(1);if(['piano','allenamento','lifestyle'].includes(_h))showTab(_h,false);
 sync();
 
 // ── SERVICE WORKER ────────────────────────────────────────────────────────────
