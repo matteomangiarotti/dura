@@ -2,13 +2,18 @@
   {
     "name": "adidas Adizero EVO SL",
     "label": "Adidas Evo SL bianche",
-    "km": 873.6,
-    "activities": 59,
+    "km": 890.9,
+    "activities": 60,
     "max_km": 800,
     "first_used": "2026-06-18",
-    "last_used": "2026-11-21",
+    "last_used": "2026-11-22",
     "photo": "./data/gear/5f07cc7e.jpg",
     "runs": [
+      {
+        "date": "2026-11-22",
+        "name": "Caronno Pertusella - Progressivo leggero 16 km",
+        "km": 17.32
+      },
       {
         "date": "2026-11-21",
         "name": "Caronno Pertusella Running",
